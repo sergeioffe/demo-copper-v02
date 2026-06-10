@@ -42,6 +42,10 @@ export function listProjects(): Promise<ProjectSummary[]> {
   return get<ProjectSummary[]>("/projects");
 }
 
+export function createProject(name: string): Promise<Version> {
+  return post<Version>("/projects", { name });
+}
+
 export function loadProject(id: string): Promise<Version> {
   return get<Version>(`/projects/${id}`);
 }

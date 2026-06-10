@@ -1,7 +1,9 @@
 // GCS-backed ProjectStore — activated when GOOGLE_SERVICE_ACCOUNT_JSON is present.
 // Wraps project-store package's ProjectStoreGCS with the server's GCSStorageProvider.
 
+import { randomUUID } from "crypto";
 import type { ProjectStore, ProjectSummary, VersionSummary } from "./store.js";
+import { makeBlankVersion } from "./store.js";
 import type { Version, ReasoningLogEntry } from "@copper/contracts";
 import { GCSStorageProvider } from "./storage/gcs.js";
 import { ProjectStoreGCS } from "@copper/project-store";
@@ -21,6 +23,13 @@ export class GCSProjectStore implements ProjectStore {
 
   async listProjects(): Promise<ProjectSummary[]> {
     return this.inner.listProjects();
+  }
+
+  async createProject(name: string): Promise<Version> {
+    const id = `project-${randomUUID().slice(0, 8)}`;
+    const blank = makeBlankVersion(id, name);
+    await this.inner.saveVersion(id, blank);
+    return blank;
   }
 
   async loadLatestVersion(id: string): Promise<Version | null> {

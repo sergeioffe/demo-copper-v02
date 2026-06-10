@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Routes, Route, Link, useLocation } from "react-router-dom";
 import { useStore } from "./store.js";
-import { listProjects, loadProject } from "./api.js";
+import { listProjects, loadProject, createProject } from "./api.js";
 import ContextPanel from "./components/ContextPanel.js";
 import PlanDocument from "./components/PlanDocument.js";
 import ProjectModel from "./components/ProjectModel.js";
@@ -97,6 +97,52 @@ function ProjectPicker({
   );
 }
 
+function NewProjectModal({ onClose, onCreate }: { onClose: () => void; onCreate: (name: string) => Promise<void> }) {
+  const [name, setName] = useState("");
+  const [busy, setBusy] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => { inputRef.current?.focus(); }, []);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const trimmed = name.trim();
+    if (!trimmed || busy) return;
+    setBusy(true);
+    try {
+      await onCreate(trimmed);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="modal-backdrop" onClick={onClose}>
+      <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-title">New project</div>
+        <form onSubmit={handleSubmit}>
+          <input
+            ref={inputRef}
+            className="modal-input"
+            placeholder="Project name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            onKeyDown={(e) => e.key === "Escape" && onClose()}
+          />
+          <div className="modal-actions">
+            <button type="button" className="modal-btn modal-btn--cancel" onClick={onClose} disabled={busy}>
+              Cancel
+            </button>
+            <button type="submit" className="modal-btn modal-btn--create" disabled={!name.trim() || busy}>
+              {busy ? "Creating…" : "Create"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 function MainApp() {
   const location = useLocation();
   const version           = useStore((s) => s.version);
@@ -109,6 +155,7 @@ function MainApp() {
   const setAvailableProjects = useStore((s) => s.setAvailableProjects);
   const loadVersionStore  = useStore((s) => s.loadVersion);
   const saveNow           = useStore((s) => s.saveNow);
+  const [showNewProject, setShowNewProject] = useState(false);
 
   useEffect(() => {
     async function init() {
@@ -135,8 +182,12 @@ function MainApp() {
     }
   }
 
-  function handleNewProject() {
-    alert("New project creation requires M3 (intelligence seam).");
+  async function handleCreateProject(name: string) {
+    const newVersion = await createProject(name);
+    const list = await listProjects();
+    setAvailableProjects(list);
+    loadVersionStore(newVersion);
+    setShowNewProject(false);
   }
 
   const isQA      = location.pathname === "/qa";
@@ -144,6 +195,12 @@ function MainApp() {
 
   return (
     <div className="app-shell">
+      {showNewProject && (
+        <NewProjectModal
+          onClose={() => setShowNewProject(false)}
+          onCreate={handleCreateProject}
+        />
+      )}
       <div className="topbar">
         <Link to="/" className="brand" title="Back to main view">
           <IconAffiliate size={16} />
@@ -157,7 +214,7 @@ function MainApp() {
             projects={availableProjects}
             currentId={version.id}
             onSelect={handleSelectProject}
-            onNew={handleNewProject}
+            onNew={() => setShowNewProject(true)}
           />
         ) : (
           <span className="proj-name muted">Loading…</span>

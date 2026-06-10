@@ -5,6 +5,7 @@
 import { readFileSync } from "fs";
 import { fileURLToPath } from "url";
 import path from "path";
+import { randomUUID } from "crypto";
 import type { Version, ReasoningLogEntry } from "@copper/contracts";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -25,6 +26,7 @@ export interface VersionSummary {
 
 export interface ProjectStore {
   listProjects(): Promise<ProjectSummary[]>;
+  createProject(name: string): Promise<Version>;
   loadLatestVersion(id: string): Promise<Version | null>;
   loadVersionAt(id: string, versionNum: number): Promise<Version | null>;
   listVersionSummaries(id: string): Promise<VersionSummary[]>;
@@ -32,6 +34,23 @@ export interface ProjectStore {
   listTransactionPasses(id: string, versionNum: number): Promise<string[]>;
   listReasoningEntries(id: string, versionNum: number, pass: string): Promise<ReasoningLogEntry[]>;
   appendReasoningEntry(id: string, versionNum: number, pass: string, entry: ReasoningLogEntry): Promise<void>;
+}
+
+export function makeBlankVersion(id: string, name: string): Version {
+  return {
+    id,
+    name,
+    version: 1,
+    parentVersion: null,
+    authoredBy: "user",
+    createdAt: new Date().toISOString(),
+    context: { contextFiles: [], exchanges: [] },
+    plans: {
+      data:     { document: "", model: { entities: {}, connections: [] } },
+      media:    { document: "", model: { entities: {}, connections: [] } },
+      creative: { document: "", model: null },
+    },
+  };
 }
 
 // ── M1: In-memory fixture store ───────────────────────────────────────────────
@@ -43,52 +62,61 @@ function loadFixture(): Version {
 }
 
 export class FixtureStore implements ProjectStore {
-  private projectId: string;
-  // All versions in order: index 0 = v1 (the seed), last = latest
-  private versions: Version[];
+  // All projects: projectId → ordered Version array (index 0 = v1, last = latest)
+  private projects = new Map<string, Version[]>();
   // In-memory reasoning log: key = "id/versionNum/pass"
   private rlog = new Map<string, ReasoningLogEntry[]>();
 
   constructor() {
     const seed = loadFixture();
-    this.projectId = seed.id;
-    this.versions = [seed];
+    this.projects.set(seed.id, [seed]);
     console.log(`[store] ✅ Fixture loaded: ${seed.name} (v${seed.version})`);
   }
 
-  private get latest(): Version {
-    return this.versions[this.versions.length - 1];
+  private versionsFor(id: string): Version[] {
+    return this.projects.get(id) ?? [];
+  }
+
+  private latestFor(id: string): Version | null {
+    const vs = this.versionsFor(id);
+    return vs.length ? vs[vs.length - 1] : null;
   }
 
   async listProjects(): Promise<ProjectSummary[]> {
-    return [
-      {
-        id: this.latest.id,
-        name: this.latest.name,
-        version: this.latest.version,
-        updatedAt: this.latest.createdAt,
-      },
-    ];
+    return Array.from(this.projects.values()).map((vs) => {
+      const latest = vs[vs.length - 1];
+      return { id: latest.id, name: latest.name, version: latest.version, updatedAt: latest.createdAt };
+    });
+  }
+
+  async createProject(name: string): Promise<Version> {
+    const id = `project-${randomUUID().slice(0, 8)}`;
+    const blank = makeBlankVersion(id, name);
+    this.projects.set(id, [blank]);
+    console.log(`[store] ✅ New project created: "${name}" (${id})`);
+    return blank;
   }
 
   async loadLatestVersion(id: string): Promise<Version | null> {
-    if (id === this.projectId) return this.latest;
-    return null;
+    return this.latestFor(id);
   }
 
   async saveVersion(_id: string, version: Version): Promise<Version> {
-    this.versions.push(version);
+    const vs = this.projects.get(version.id);
+    if (vs) {
+      vs.push(version);
+    } else {
+      this.projects.set(version.id, [version]);
+    }
     return version;
   }
 
   async loadVersionAt(id: string, versionNum: number): Promise<Version | null> {
-    if (id !== this.projectId) return null;
-    return this.versions.find((v) => v.version === versionNum) ?? null;
+    return this.versionsFor(id).find((v) => v.version === versionNum) ?? null;
   }
 
   async listVersionSummaries(id: string): Promise<VersionSummary[]> {
-    if (id !== this.projectId) return [];
-    return this.versions.map((v) => ({
+    return this.versionsFor(id).map((v) => ({
       versionNum: v.version,
       parentVersion: v.parentVersion,
       authoredBy: v.authoredBy,

@@ -4,6 +4,19 @@ import type { ProjectStore } from "../store.js";
 export function makeProjectsRouter(store: ProjectStore): Router {
   const router = Router();
 
+  // POST /api/projects — create a new blank project
+  router.post("/", async (req, res) => {
+    const { name } = req.body as { name?: string };
+    if (!name?.trim()) return res.status(400).json({ error: "name is required" });
+    try {
+      const version = await store.createProject(name.trim());
+      res.status(201).json(version);
+    } catch (err) {
+      console.error("[projects] create failed:", (err as Error).message);
+      res.status(500).json({ error: "Failed to create project" });
+    }
+  });
+
   // GET /api/projects — list available projects
   router.get("/", async (_req, res) => {
     try {
