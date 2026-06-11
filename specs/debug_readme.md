@@ -2,8 +2,10 @@
 
 All endpoints are available over HTTP. No terminal access required — works on Railway.
 
-Base URL in production: your Railway app URL (e.g. `https://your-app.railway.app`)
-Base URL locally: `http://localhost:3001`
+**Production base URL:** `https://copper-demo-v02-production.up.railway.app`
+**Local base URL:** `http://localhost:3001`
+
+Start every session by calling `GET /api/projects` to discover the project ID — it is not fixed and must be read from the response.
 
 ---
 
@@ -27,7 +29,22 @@ Base URL locally: `http://localhost:3001`
 ```
 GET /api/projects
 ```
-Response: array of `{ id, name, version, ... }`
+Response: array of project summaries. The `id` field is what you pass to all other endpoints.
+
+```json
+[
+  {
+    "id": "luminary-health-q3-2025",
+    "name": "Luminary Health Q3 2025",
+    "version": 1,
+    "parentVersion": null,
+    "authoredBy": "seed",
+    "createdAt": "2025-06-11T00:00:00.000Z"
+  }
+]
+```
+
+Use the `id` value (e.g. `luminary-health-q3-2025`) wherever `:id` appears in the endpoints below.
 
 ### Get full current state of a project
 ```
