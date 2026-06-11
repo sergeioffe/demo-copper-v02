@@ -3,7 +3,7 @@
 
 import { randomUUID } from "crypto";
 import type { ProjectStore, ProjectSummary, VersionSummary } from "./store.js";
-import { makeBlankVersion } from "./store.js";
+import { makeBlankVersion, slugify } from "./store.js";
 import type { Version, ReasoningLogEntry } from "@copper/contracts";
 import { GCSStorageProvider } from "./storage/gcs.js";
 import { ProjectStoreGCS } from "@copper/project-store";
@@ -26,7 +26,7 @@ export class GCSProjectStore implements ProjectStore {
   }
 
   async createProject(name: string): Promise<Version> {
-    const id = `project-${randomUUID().slice(0, 8)}`;
+    const id = `${slugify(name)}-${randomUUID().replace(/-/g, "").slice(0, 5)}`;
     const blank = makeBlankVersion(id, name);
     await this.inner.saveVersion(id, blank);
     return blank;

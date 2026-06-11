@@ -54,9 +54,14 @@ export class ProjectStoreGCS {
       .filter((f) => /^ver\d+$/.test(f))
       .sort()
       .reverse();
-    if (verFolders.length === 0) return null;
-    const latestNum = parseInt(verFolders[0].slice(3), 10);
-    return this.loadVersion(projectId, latestNum);
+    // Walk backwards: a version folder may exist with only transactions (no project.json)
+    // when reasoning log was journaled before the user explicitly saved the version.
+    for (const folder of verFolders) {
+      const num = parseInt(folder.slice(3), 10);
+      const v = await this.loadVersion(projectId, num);
+      if (v) return v;
+    }
+    return null;
   }
 
   async saveVersion(projectId: string, version: Version): Promise<Version> {

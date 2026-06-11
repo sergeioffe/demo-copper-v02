@@ -147,7 +147,7 @@ export class FixtureStore implements ProjectStore {
 // ── M2: GCS-backed store (activated when GCS credentials are present) ─────────
 // Imported lazily so M1 starts without GCS configured.
 
-function slugify(name: string): string {
+export function slugify(name: string): string {
   const slug = name
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
