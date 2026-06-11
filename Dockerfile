@@ -38,8 +38,9 @@ COPY packages/intelligence/package*.json ./packages/intelligence/
 COPY server/package*.json ./server/
 RUN npm ci --omit=dev --workspace=server --include-workspace-root
 
-# Compiled server + packages
+# Compiled server + packages + runtime data files the server reads directly
 COPY --from=build /app/server/dist ./server/dist
+COPY --from=build /app/server/fixtures ./server/fixtures
 COPY --from=build /app/packages/contracts/dist ./packages/contracts/dist
 COPY --from=build /app/packages/kb/dist ./packages/kb/dist
 COPY --from=build /app/packages/project-store/dist ./packages/project-store/dist
