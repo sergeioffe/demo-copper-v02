@@ -231,13 +231,16 @@ function MainApp() {
 
         <div className="topbar-right">
           <Link to={isHistory ? "/" : "/history"} className={`icon-btn${isHistory ? " active" : ""}`} title={isHistory ? "Back to main view" : "Version History"}>
-            <IconHistory size={15} />
+            <IconHistory size={14} />
+            Versions
           </Link>
           <Link to={isQA ? "/" : "/qa"} className={`icon-btn${isQA ? " active" : ""}`} title={isQA ? "Back to main view" : "Transaction / QA Viewer"}>
-            <IconBug size={15} />
+            <IconBug size={14} />
+            Reasoning
           </Link>
           <Link to={isAdmin ? "/" : "/admin"} className={`icon-btn icon-btn--admin${isAdmin ? " active" : ""}`} title={isAdmin ? "Back to main view" : "Admin"}>
-            <IconSettings size={15} />
+            <IconSettings size={14} />
+            Admin
           </Link>
           <div className="sep" />
           <select className="sel" value={llmModel} onChange={(e) => setLlmModel(e.target.value)}>

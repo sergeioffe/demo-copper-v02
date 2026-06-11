@@ -235,8 +235,8 @@ html, body {
 .btn:hover { background: var(--bg2); }
 .btn:disabled { opacity: 0.45; cursor: not-allowed; }
 .icon-btn {
-  width: 28px;
   height: 28px;
+  padding: 0 9px;
   border-radius: 6px;
   border: 1px solid var(--b2);
   background: transparent;
@@ -244,8 +244,11 @@ html, body {
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 500;
   flex-shrink: 0;
+  white-space: nowrap;
 }
 .icon-btn:hover { background: var(--bg2); color: var(--txt); }
 .icon-btn.active { background: var(--blue-bg); color: var(--blue-txt); border-color: var(--blue-bd); }
@@ -625,8 +628,8 @@ html, body {
 .mg-fg-count { font-size: 10px; color: var(--txt3); }
 
 /* ── VIEW 2 — GRAPH-GRID ── */
-.mg-v2 { flex: 1; min-height: 0; overflow: auto; display: flex; flex-direction: column; }
-.mg-v2-canvas { position: relative; flex: 1; }
+.mg-v2 { flex: 1; min-height: 0; overflow: auto; }
+.mg-v2-canvas { position: relative; }
 .mg-v2-svg { position: absolute; top: 0; left: 0; pointer-events: none; }
 .mg-v2-nodes { position: absolute; top: 0; left: 0; }
 .mg-gg-node { position: absolute; background: var(--bg); border: 1.5px solid var(--b); border-radius: 7px; box-shadow: 0 1px 4px rgba(0,0,0,.06); }

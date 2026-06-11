@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useLayoutEffect, useCallback } from "react";
 import type { MediaPlanModel, AnyEntity } from "@copper/contracts";
 import { TYPE_META, COLS, getRelated, getRootRows, statusBadgeStyle, typeBadgeStyle } from "./schema.js";
 
@@ -147,6 +147,21 @@ export default function ViewGraphGrid({ model, organizeBy, selection, onSelectio
   const [nodes, setNodes] = useState<GGNodeDef[]>([]);
   const [seq, setSeq] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [containerSize, setContainerSize] = useState({ w: 900, h: 500 });
+
+  useLayoutEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    // Read real size synchronously before first paint (no flicker)
+    const r = el.getBoundingClientRect();
+    if (r.width > 0) setContainerSize({ w: Math.round(r.width), h: Math.round(r.height) });
+    const ro = new ResizeObserver((entries) => {
+      const { width, height } = entries[0].contentRect;
+      setContainerSize({ w: Math.round(width), h: Math.round(height) });
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   useEffect(() => {
     const rootRows = getRootRows(organizeBy, entities as Record<string, { type: string; name?: string }>) as RowData[];
@@ -218,13 +233,14 @@ export default function ViewGraphGrid({ model, organizeBy, selection, onSelectio
     });
   }, []);
 
-  const canvasW = nodes.length ? Math.max(...nodes.map((n) => n.x + GG_NW)) + 60 : 800;
-  const canvasH = nodes.length ? Math.max(...nodes.map((n) => n.y + HDR_H + THEAD_H + n.rows.length * ROW_H)) + 60 : 500;
+  const contentW = nodes.length ? Math.max(...nodes.map((n) => n.x + GG_NW)) + 60 : 600;
+  const contentH = nodes.length ? Math.max(...nodes.map((n) => n.y + HDR_H + THEAD_H + n.rows.length * ROW_H)) + 60 : 400;
+  const canvasW = Math.max(contentW, containerSize.w);
+  const canvasH = Math.max(contentH, containerSize.h);
 
   return (
     <div className="mg-v2" ref={containerRef}>
-      {/* Canvas fills the panel; min-width/min-height ensure scroll when content grows */}
-      <div className="mg-v2-canvas" style={{ minWidth: canvasW, minHeight: canvasH }}>
+      <div className="mg-v2-canvas" style={{ width: canvasW, height: canvasH }}>
         <svg className="mg-v2-svg" style={{ width: canvasW, height: canvasH }}>
           <defs>
             <marker id="gg-arrow" viewBox="0 0 10 10" refX={8} refY={5} markerWidth={4} markerHeight={4} orient="auto-start-reverse">
