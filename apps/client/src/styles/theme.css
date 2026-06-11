@@ -625,7 +625,8 @@ html, body {
 .mg-fg-count { font-size: 10px; color: var(--txt3); }
 
 /* ── VIEW 2 — GRAPH-GRID ── */
-.mg-v2 { position: relative; flex: 1; min-height: 0; overflow: auto; }
+.mg-v2 { flex: 1; min-height: 0; overflow: auto; display: flex; flex-direction: column; }
+.mg-v2-canvas { position: relative; flex: 1; }
 .mg-v2-svg { position: absolute; top: 0; left: 0; pointer-events: none; }
 .mg-v2-nodes { position: absolute; top: 0; left: 0; }
 .mg-gg-node { position: absolute; background: var(--bg); border: 1.5px solid var(--b); border-radius: 7px; box-shadow: 0 1px 4px rgba(0,0,0,.06); }

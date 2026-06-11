@@ -223,8 +223,8 @@ export default function ViewGraphGrid({ model, organizeBy, selection, onSelectio
 
   return (
     <div className="mg-v2" ref={containerRef}>
-      {/* In-flow wrapper gives the overflow:auto parent a real scroll extent */}
-      <div style={{ position: "relative", width: canvasW, height: canvasH }}>
+      {/* Canvas fills the panel; min-width/min-height ensure scroll when content grows */}
+      <div className="mg-v2-canvas" style={{ minWidth: canvasW, minHeight: canvasH }}>
         <svg className="mg-v2-svg" style={{ width: canvasW, height: canvasH }}>
           <defs>
             <marker id="gg-arrow" viewBox="0 0 10 10" refX={8} refY={5} markerWidth={4} markerHeight={4} orient="auto-start-reverse">
