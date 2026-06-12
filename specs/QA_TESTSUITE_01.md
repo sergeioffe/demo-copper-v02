@@ -96,6 +96,7 @@ Laws 1–4 are the original four (keep verbatim). Laws 5–8 are the additions t
 | `tables:N` | exactly N `Table` entities |
 | `activation:>=1` | at least one entity of type `Filter` OR `AlgoAI` |
 | `connections:[A→B,…]` | these directed connections must exist (activation topology) |
+| `predicate_references:[…]` | the Filter entity's `predicate` field must contain each listed token (e.g. `$impression.geo`); checked in the predicate string, NOT as a connection edge |
 | `output_fields:any[…]` | Output.fields contains AT LEAST ONE listed name (case-insensitive substring) |
 | `output_fields:all[…]` | Output.fields contains ALL listed names |
 | `output_maxRows:>1` | the single Output has maxRows > 1 (recommendation shape) |
@@ -152,7 +153,8 @@ Six classes; the suite covers all six so coverage is a checklist, not a vibe.
 - `types:[Impression, Filter, Table, Output]`
 - `entity_count:{Impression:1, Output:1}`
 - `tables:1`
-- `connections:[Impression→Filter, Filter→Table, Table→Output]`
+- `connections:[Table→Filter, Filter→Output]`
+- `predicate_references:[$impression.geo]`
 - `reasoning_excludes:[FlowObject, UARef, ActivationEntry, FlowSegment]`
 
 **Why:** the floor. If this fails, the v2 entity reference itself isn't reaching the agent — fix that before anything else.

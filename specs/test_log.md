@@ -61,7 +61,7 @@ Add the entry (prompt + criteria) **before running**, not after. Writing the cri
 | ID | Description | Status | Last run |
 |---|---|---|---|
 | TC-001 | Zip activation + product recommendation, empty project | ✅ PASS | 2026-06-11 |
-| TC-101 | Typing when named — impression + zip filter + 1 product table | ✅ PASS | 2026-06-11 |
+| TC-101 | Typing when named — impression + zip filter + 1 product table | ✅ PASS | 2026-06-12 |
 | TC-201 | Default shape, under-specified goal | ✅ PASS | 2026-06-11 |
 | TC-202 | Default shape, banner vertical (generalization guard) | ✅ PASS | 2026-06-11 |
 | TC-301 | Disambiguation — deterministic lookup vs ML ranking | ✅ PASS | 2026-06-11 |
@@ -182,6 +182,39 @@ Also fixed: evaluator connection criterion was checking wrong arrow direction (`
 | `reasoning_excludes:[FlowObject,…]` | ✅ | |
 
 **Open item:** `QA_TESTSUITE_01.md` criterion says `connections:[Impression→Filter, Filter→Table, Table→Output]`. The correct topology for a Filter pattern is `Table→Filter` (table is lookup source) and `Filter→Output`. Criterion in the test file has the middle two arrows reversed. Flagged for user review.
+
+#### Run 3 — 2026-06-12 — ✅ PASS (filter topology integrated)
+
+**Context:** Filter semantics directive integrated into KB. Three KB files updated (schema.md, activation-graph.md, patterns.md). QA_TESTSUITE_01.md TC-101 criteria updated to match new topology rule. Re-ran to confirm suite still passes.
+
+**Criteria (updated):**
+- `types:[Impression, Filter, Table, Output]`
+- `entity_count:{Impression:1, Output:1}`
+- `tables:1`
+- `connections:[Table→Filter, Filter→Output]`
+- `predicate_references:[$impression.geo]`
+- `reasoning_excludes:[FlowObject, UARef, ActivationEntry, FlowSegment]`
+
+| Criterion | Result | Detail |
+|---|---|---|
+| `types:[Impression,Filter,Table,Output]` | ✅ | All four present |
+| `entity_count:{Impression:1,Output:1}` | ✅ | |
+| `tables:1` | ✅ | Products only |
+| `connections:[Table→Filter, Filter→Output]` | ✅ | `tbl_products→flt_zip`, `flt_zip→out_main`; no Impression→Filter edge |
+| `predicate_references:[$impression.geo]` | ✅ | predicate: `getZip($impression.geo) matches Products.zip` |
+| `reasoning_excludes:[FlowObject,…]` | ✅ | |
+
+Agent reasoning: *"Impression does NOT connect to the Filter; $impression.geo appears only in the predicate string."* — correctly internalized the new semantic rule.
+
+**KB changes in this iteration:**
+
+`knowledge/data-activation/schema.md` — Added "Filter connection topology" subsection to the Filter entity definition. Canonical topology: `Table → Filter` (FROM, ≥1), `Filter → Output`. Explicit rule: do not emit `Impression → Filter`; impression fields appear only as `$impression.*` tokens in the predicate string. Fixed data-flow comment in "The six op forms" section from `Impression → Filter → Table → Output` to `Table → Filter → Output`.
+
+`knowledge/data-activation/activation-graph.md` — Fixed canonical shape at top (was `Impression → activation rule → Table → Output`, now shows Filter and AlgoAI paths separately). Replaced `Impression → Filter` connection entry in connections list with the correct `Table → Filter` + note that impression is predicate-text only.
+
+`knowledge/data-activation/patterns.md` — Removed `Impression → Filter` connection from Patterns 1, 3, 4, 7. Added `Table → Filter` to Pattern 1 (was missing — filter without a FROM table is malformed). Updated predicate in Pattern 7 to `$impression.dmp_id in EligibleUsers.user_id` to make impression field usage visible in predicate.
+
+`specs/QA_TESTSUITE_01.md` — Updated TC-101 connections criterion from `[Impression→Filter, Filter→Table, Table→Output]` to `[Table→Filter, Filter→Output]`. Added `predicate_references:[$impression.geo]` criterion. Added `predicate_references` token to Criteria DSL table.
 
 ---
 
