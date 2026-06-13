@@ -29,6 +29,10 @@ export interface Exchange {
   responseTimeMs?: number;
   planType?: "data" | "media" | null;
   proposal?: ProposalPayload | null;
+  card?: {
+    cardType: string;
+    props: Record<string, unknown>;
+  };
   rawResponse?: string;
 }
 

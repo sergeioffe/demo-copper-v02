@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState } from "react";
 import { useStore } from "../store.js";
 import ProposalCard from "./ProposalCard.js";
+import { CardPlayer } from "./cards/CardPlayer.js";
 import { chat } from "../api.js";
 import { IconMessage, IconArrowUp } from "@tabler/icons-react";
 import type { Exchange } from "@copper/contracts";
@@ -136,6 +137,7 @@ function ExchangeBubble({ exchange }: { exchange: Exchange }) {
       ) : (
         <div className="ex-assistant-msg">
           <div className="ex-text">{exchange.text}</div>
+          {exchange.card && <CardPlayer card={exchange.card} />}
           {exchange.proposal && (
             <ProposalCard proposal={exchange.proposal} />
           )}

@@ -237,6 +237,26 @@ export async function adminQAFetchKBFiles(): Promise<Array<{ path: string; conte
   return results;
 }
 
+// ── Card definitions ──────────────────────────────────────────────────────────
+
+export interface CardDefinition {
+  cardType: string;
+  propsSchema: Record<string, string>;
+  exampleProps: Record<string, unknown>;
+  allowedActions: string[];
+  fallbackText: string;
+  whenToUse: string;
+  whenNotToUse: string;
+}
+
+export function loadCardDefinitions(): Promise<{ definitions: CardDefinition[] }> {
+  return get("/cards/definitions");
+}
+
+export function seedCards(): Promise<{ ok: boolean; written: string[] }> {
+  return post("/cards/seed", {});
+}
+
 export function adminQAPropose(
   prompt: string,
   expected: string,

@@ -19,6 +19,7 @@ import { makeHistoryRouter } from "./routes/history.js";
 import { makeChatRouter } from "./routes/chat.js";
 import { makeAdminRouter } from "./routes/admin.js";
 import { makeDebugRouter } from "./routes/debug.js";
+import { makeCardsRouter, ensureCardsSeedded } from "./routes/cards.js";
 
 const PORT = process.env.PORT ?? 3001;
 const CORS_ORIGIN = process.env.CORS_ORIGIN ?? "http://localhost:5173";
@@ -31,6 +32,7 @@ app.get("/health", (_req, res) => res.json({ ok: true, version: "v2" }));
 
 const store = await createStore();
 let kbContent = await loadKB();
+await ensureCardsSeedded();
 const getKB = () => kbContent;
 const reloadKB = async () => {
   kbContent = await loadKB();
@@ -42,6 +44,7 @@ app.use("/api/projects", makeTransactionsRouter(store));
 app.use("/api/projects", makeHistoryRouter(store));
 app.use("/api/projects", makeChatRouter(store, getKB));
 app.use("/api/admin", makeAdminRouter(reloadKB));
+app.use("/api/cards", makeCardsRouter());  // GET /definitions, POST /seed
 app.use("/api/debug", makeDebugRouter(store, getKB));
 
 // Serve built client in production (same container, no CORS needed)

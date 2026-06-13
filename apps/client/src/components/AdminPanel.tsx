@@ -6,7 +6,8 @@ import {
   adminList, adminReadFile, adminWriteFile,
   adminKBVersions, adminKBCut, adminKBVersionFiles, adminKBVersionFile, adminKBRollback,
   adminQARun, adminQAFetchKBFiles, adminQAPropose,
-  type KBVersionMeta, type QARunResult, type QAJudgeResult,
+  loadCardDefinitions, seedCards,
+  type KBVersionMeta, type QARunResult, type QAJudgeResult, type CardDefinition,
 } from "../api.js";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -648,9 +649,130 @@ function ProjectsTab() {
   );
 }
 
+// ── Cards Tab ────────────────────────────────────────────────────────────────
+
+function CardsTab() {
+  const [defs, setDefs] = useState<CardDefinition[] | null>(null);
+  const [source, setSource] = useState<string>("—");
+  const [seeding, setSeeding] = useState(false);
+  const [seedResult, setSeedResult] = useState<string | null>(null);
+  const [selected, setSelected] = useState<CardDefinition | null>(null);
+
+  async function refresh() {
+    setSeedResult(null);
+    setDefs(null);
+    try {
+      const res = await fetch("/api/cards/definitions");
+      const src = res.headers.get("X-Cards-Source") ?? "unknown";
+      setSource(src);
+      const data = await res.json() as { definitions: CardDefinition[] };
+      setDefs(data.definitions);
+      if (data.definitions.length > 0 && !selected) setSelected(data.definitions[0]);
+    } catch (err) {
+      setDefs([]);
+    }
+  }
+
+  useEffect(() => { refresh(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function handleSeed() {
+    setSeeding(true);
+    setSeedResult(null);
+    try {
+      const r = await seedCards();
+      setSeedResult(`Seeded ${r.written.length} files to GCS.`);
+      await refresh();
+    } catch (err) {
+      setSeedResult(`Error: ${(err as Error).message}`);
+    } finally {
+      setSeeding(false);
+    }
+  }
+
+  return (
+    <div className="admin-layout">
+      <div className="admin-sidebar">
+        <div style={{ padding: "10px 12px 6px", borderBottom: "1px solid var(--b)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+            <span style={{ fontSize: 11, color: "var(--txt3)" }}>
+              Source: <strong style={{ color: source === "gcs" ? "var(--green-txt)" : "var(--amber-txt)" }}>{source}</strong>
+            </span>
+            <button
+              className="admin-qa-btn admin-qa-btn--ghost"
+              style={{ marginLeft: "auto", fontSize: 10 }}
+              onClick={refresh}>↺</button>
+          </div>
+          <button
+            className={`admin-qa-btn ${source === "gcs" ? "admin-qa-btn--ghost" : "admin-qa-btn--primary"}`}
+            style={{ width: "100%" }}
+            disabled={seeding}
+            onClick={handleSeed}>
+            {seeding ? "Seeding…" : source === "gcs" ? "Re-seed to GCS" : "Seed to GCS"}
+          </button>
+          {seedResult && (
+            <div style={{ fontSize: 11, marginTop: 6, color: seedResult.startsWith("Error") ? "var(--coral-txt)" : "var(--green-txt)" }}>
+              {seedResult}
+            </div>
+          )}
+        </div>
+        {defs === null && <div className="admin-loading" style={{ padding: 12 }}>Loading…</div>}
+        {defs !== null && defs.map((d) => (
+          <div key={d.cardType}
+            className={`admin-tree-row admin-tree-row--file${selected?.cardType === d.cardType ? " sel" : ""}`}
+            onClick={() => setSelected(d)}>
+            <span className="admin-tree-icon">·</span>
+            <span className="admin-tree-label" style={{ fontFamily: "var(--mono)", fontSize: 11 }}>{d.cardType}</span>
+          </div>
+        ))}
+      </div>
+
+      <div className="admin-viewer" style={{ padding: 16, overflowY: "auto" }}>
+        {!selected ? (
+          <div className="admin-empty">Select a card definition</div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 14, fontSize: 12 }}>
+            <div>
+              <div style={{ fontSize: 9, textTransform: "uppercase", letterSpacing: ".08em", color: "var(--txt3)", fontWeight: 700, marginBottom: 3 }}>cardType</div>
+              <code style={{ fontFamily: "var(--mono)", color: "var(--blue-txt)" }}>{selected.cardType}</code>
+            </div>
+            <div>
+              <div style={{ fontSize: 9, textTransform: "uppercase", letterSpacing: ".08em", color: "var(--txt3)", fontWeight: 700, marginBottom: 3 }}>allowedActions</div>
+              <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
+                {selected.allowedActions.map((a) => (
+                  <span key={a} style={{ fontSize: 10, padding: "1px 6px", borderRadius: 4, background: "var(--bg3)", border: "1px solid var(--b2)", fontFamily: "var(--mono)" }}>{a}</span>
+                ))}
+              </div>
+            </div>
+            <div>
+              <div style={{ fontSize: 9, textTransform: "uppercase", letterSpacing: ".08em", color: "var(--txt3)", fontWeight: 700, marginBottom: 3 }}>whenToUse</div>
+              <p style={{ color: "var(--txt2)", lineHeight: 1.6 }}>{selected.whenToUse}</p>
+            </div>
+            <div>
+              <div style={{ fontSize: 9, textTransform: "uppercase", letterSpacing: ".08em", color: "var(--txt3)", fontWeight: 700, marginBottom: 3 }}>whenNotToUse</div>
+              <p style={{ color: "var(--txt2)", lineHeight: 1.6 }}>{selected.whenNotToUse}</p>
+            </div>
+            <div>
+              <div style={{ fontSize: 9, textTransform: "uppercase", letterSpacing: ".08em", color: "var(--txt3)", fontWeight: 700, marginBottom: 3 }}>fallbackText</div>
+              <p style={{ color: "var(--txt3)", fontStyle: "italic", lineHeight: 1.6 }}>{selected.fallbackText}</p>
+            </div>
+            <div>
+              <div style={{ fontSize: 9, textTransform: "uppercase", letterSpacing: ".08em", color: "var(--txt3)", fontWeight: 700, marginBottom: 3 }}>propsSchema</div>
+              <pre className="admin-qa-pre" style={{ fontSize: 10 }}>{JSON.stringify(selected.propsSchema, null, 2)}</pre>
+            </div>
+            <div>
+              <div style={{ fontSize: 9, textTransform: "uppercase", letterSpacing: ".08em", color: "var(--txt3)", fontWeight: 700, marginBottom: 3 }}>exampleProps</div>
+              <pre className="admin-qa-pre" style={{ fontSize: 10 }}>{JSON.stringify(selected.exampleProps, null, 2)}</pre>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ── Admin Panel shell ─────────────────────────────────────────────────────────
 
-type AdminTab = "kb" | "qa" | "projects";
+type AdminTab = "kb" | "qa" | "cards" | "projects";
 
 export default function AdminPanel() {
   const [tab, setTab] = useState<AdminTab>("kb");
@@ -665,6 +787,9 @@ export default function AdminPanel() {
           <button className={`admin-tab${tab === "qa" ? " active" : ""}`} onClick={() => setTab("qa")}>
             KB QA Agent
           </button>
+          <button className={`admin-tab${tab === "cards" ? " active" : ""}`} onClick={() => setTab("cards")}>
+            Cards
+          </button>
           <button className={`admin-tab${tab === "projects" ? " active" : ""}`} onClick={() => setTab("projects")}>
             Projects
           </button>
@@ -673,6 +798,7 @@ export default function AdminPanel() {
       <div className="admin-body">
         {tab === "kb"       && <KBTab />}
         {tab === "qa"       && <QAAgentTab onSwitchToKB={() => setTab("kb")} />}
+        {tab === "cards"    && <CardsTab />}
         {tab === "projects" && <ProjectsTab />}
       </div>
     </div>
