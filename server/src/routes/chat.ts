@@ -38,6 +38,7 @@ export function makeChatRouter(store: ProjectStore, getKB: () => string = () => 
     let llmReply: string;
     let ops: Intent[];
     let reasoning: ReasoningLogEntry["reasoning"];
+    let llmCard: { cardType: string; props: Record<string, unknown> } | null = null;
     const startedAt = new Date().toISOString();
 
     try {
@@ -53,6 +54,7 @@ export function makeChatRouter(store: ProjectStore, getKB: () => string = () => 
         justification: "LLM did not provide structured reasoning.",
         alternativesConsidered: [],
       };
+      llmCard = result.card ?? null;
     } catch (err) {
       console.error("[chat] LLM call failed:", (err as Error).message);
       return res.status(500).json({ error: `LLM error: ${(err as Error).message}` });
@@ -102,7 +104,7 @@ export function makeChatRouter(store: ProjectStore, getKB: () => string = () => 
       responseTimeMs,
       llmModel,
       planType: null,
-      ...(result.card ? { card: result.card } : {}),
+      ...(llmCard ? { card: llmCard } : {}),
     };
 
     console.log(
