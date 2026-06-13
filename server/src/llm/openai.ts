@@ -25,6 +25,7 @@ export async function callOpenAI({ llmModel, systemPrompt, userMessage }: LLMReq
       rawResponse: text,
       reasoning:   (parsed.reasoning as ReasoningBlock) ?? null,
       reply:       (parsed.reply as string)             ?? null,
+      card:        (parsed.card as { cardType: string; props: Record<string, unknown> }) ?? null,
     };
   } catch (err) {
     console.error(`[openai] JSON parse failed: ${(err as Error).message}`);

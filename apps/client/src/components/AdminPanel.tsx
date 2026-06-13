@@ -60,7 +60,7 @@ function KBTab() {
 
   useEffect(() => {
     adminList("knowledge").then((r) => {
-      const folders = r.folders.filter((f) => f !== "versions");
+      const folders = r.folders.filter((f) => f !== "versions" && f !== "ux-cards");
       setWcFolders(folders);
       // pre-expand the first folder
       if (folders.length > 0) {

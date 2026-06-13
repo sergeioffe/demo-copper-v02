@@ -24,6 +24,7 @@ export interface LLMResponse {
   // M3 fields
   reasoning: ReasoningBlock | null;
   reply: string | null;
+  card: { cardType: string; props: Record<string, unknown> } | null;
 }
 
 export async function routeLLM(req: LLMRequest): Promise<LLMResponse> {

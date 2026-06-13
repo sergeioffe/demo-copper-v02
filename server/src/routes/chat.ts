@@ -102,6 +102,7 @@ export function makeChatRouter(store: ProjectStore, getKB: () => string = () => 
       responseTimeMs,
       llmModel,
       planType: null,
+      ...(result.card ? { card: result.card } : {}),
     };
 
     console.log(

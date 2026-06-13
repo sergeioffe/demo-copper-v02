@@ -1,4 +1,12 @@
 import type { Version } from "@copper/contracts";
+import { CARD_DEFINITIONS } from "../cards/definitions.js";
+
+const CARD_GUIDANCE = CARD_DEFINITIONS.map((d) => {
+  const schema = Object.entries(d.propsSchema)
+    .map(([k, v]) => `${k}: ${v}`)
+    .join(", ");
+  return `${d.cardType}\n  WHEN: ${d.whenToUse}\n  NOT:  ${d.whenNotToUse}\n  props: { ${schema} }`;
+}).join("\n\n");
 
 export function buildSystemPrompt(version: Version, kbContent = ""): string {
   const dataEntities  = version.plans.data.model?.entities  ?? {};
@@ -76,6 +84,18 @@ Status values: planned | synced | live | modified | drifted
 7. NARROW OP prompt (user names a specific entity to add or modify — "add a Products table with these fields", "update the Filter predicate"): do exactly that, nothing more. Do not auto-add Impression, activation rules, or Output. The user is managing their plan incrementally.
 8. When in doubt: if the prompt names specific entity types or field names, treat it as a narrow op (rule 7). If it describes a goal or business outcome without naming entities, treat it as a goal prompt (rule 6).
 9. RESHAPE EXCEPTION (overrides rules 7 and 8): "Impression" is a reserved entity type — it is NOT a stored table. If the user asks to add a Table named "Impression" or "Impressions" (or with fields dmp_id, geo, device, placement_id), emit an Impression entity instead and note the correction in "reply". Category errors on reserved types are always reshaped, even in narrow-op mode.
+
+## CARD OUTPUT (optional)
+The UI renders rich card components alongside your "reply" text. Emit at most one card per response; omit "card" entirely if none fits.
+
+Add a top-level "card" field to your JSON:
+  "card": { "cardType": "...", "props": { ... } }
+
+Available cards:
+
+${CARD_GUIDANCE}
+
+Key rule: whenever ops[] is non-empty, emit a changeSummary card summarising what changed. For all other situations, use the most specific matching card or omit.
 
 ## RESPONSE FORMAT
 Respond with a single valid JSON object. No markdown fences, no comments, no text outside the JSON.
