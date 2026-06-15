@@ -60,6 +60,7 @@ export function makeDebugRouter(store: ProjectStore, getKB: () => string = () =>
     let llmReply: string;
     let ops: Intent[];
     let reasoning: ReasoningLogEntry["reasoning"];
+    let llmCard: { cardType: string; props: Record<string, unknown> } | null = null;
 
     try {
       const result = await routeLLM({ llmModel, systemPrompt, userMessage: userMessageSent });
@@ -73,6 +74,7 @@ export function makeDebugRouter(store: ProjectStore, getKB: () => string = () =>
         justification: "LLM did not provide structured reasoning.",
         alternativesConsidered: [],
       };
+      llmCard = result.card ?? null;
     } catch (err) {
       return res.status(500).json({ error: `LLM error: ${(err as Error).message}` });
     }
@@ -120,6 +122,7 @@ export function makeDebugRouter(store: ProjectStore, getKB: () => string = () =>
       responseTimeMs,
       llmModel,
       planType: null,
+      ...(llmCard ? { card: llmCard } : {}),
     };
 
     res.json({
