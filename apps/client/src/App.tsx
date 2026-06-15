@@ -9,6 +9,7 @@ import VersionBar from "./components/VersionBar.js";
 import QAViewer from "./components/QAViewer.js";
 import HistoryPanel from "./components/HistoryPanel.js";
 import AdminPanel from "./components/AdminPanel.js";
+import WizardSurface from "./components/WizardSurface.js";
 import {
   IconAffiliate,
   IconDatabase,
@@ -22,6 +23,7 @@ import {
   IconBug,
   IconHistory,
   IconSettings,
+  IconWand,
 } from "@tabler/icons-react";
 
 const LLM_MODELS = [
@@ -199,6 +201,7 @@ function MainApp() {
   const isQA      = location.pathname === "/qa";
   const isHistory = location.pathname === "/history";
   const isAdmin   = location.pathname === "/admin";
+  const isWizard  = location.pathname === "/wizard";
 
   return (
     <div className="app-shell">
@@ -234,6 +237,10 @@ function MainApp() {
             <IconHistory size={14} />
             Versions
           </Link>
+          <Link to={isWizard ? "/" : "/wizard"} className={`icon-btn${isWizard ? " active" : ""}`} title={isWizard ? "Back to main view" : "Card Wizard"}>
+            <IconWand size={14} />
+            Wizard
+          </Link>
           <Link to={isQA ? "/" : "/qa"} className={`icon-btn${isQA ? " active" : ""}`} title={isQA ? "Back to main view" : "Transaction / QA Viewer"}>
             <IconBug size={14} />
             Reasoning
@@ -253,6 +260,8 @@ function MainApp() {
 
       {isAdmin ? (
         <AdminPanel />
+      ) : isWizard ? (
+        <WizardSurface />
       ) : isHistory ? (
         <HistoryPanel />
       ) : isQA ? (
