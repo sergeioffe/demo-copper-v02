@@ -3,7 +3,7 @@ import { useStore } from "../store.js";
 import { TableDiscoveryCard } from "./cards/TableDiscoveryCard.js";
 import { KeySelectionCard } from "./cards/KeySelectionCard.js";
 import { FilterRecommendationCard } from "./cards/FilterRecommendationCard.js";
-import { IconX, IconClick, IconTable, IconFilter, IconCloudDownload, IconCpu, IconArrowBarToRight, IconBroadcast, IconLayout } from "@tabler/icons-react";
+import { IconX, IconTable, IconFilter, IconCloudDownload, IconCpu, IconArrowBarToRight, IconBroadcast, IconLayout } from "@tabler/icons-react";
 import type {
   DataPlanEntity,
   MediaPlanEntity,
@@ -249,16 +249,7 @@ export default function InspectorPanel({ planType }: { planType: "data" | "media
     else setGraphSel([]);
   }
 
-  if (!entity) {
-    return (
-      <div className="inspector inspector--empty">
-        <div className="insp-placeholder">
-          <IconClick size={22} stroke={1.5} />
-          <span>Click any node to inspect it.</span>
-        </div>
-      </div>
-    );
-  }
+  if (!entity) return null;
 
   const { label, css, Icon } = kindMeta;
   const displayName = (entity as { name?: string }).name ?? entityId ?? label;
