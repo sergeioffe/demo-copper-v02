@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useStore } from "../store.js";
 import GraphCanvas from "./GraphCanvas.js";
 import MediaGraph from "./mediaGraph/MediaGraph.js";
+import InspectorPanel from "./InspectorPanel.js";
 import { classifyFile } from "../lib/parseContextFile.js";
 import { useDocumentHandlers } from "../hooks/useDocumentHandlers.js";
 import { IconCloudUpload } from "@tabler/icons-react";
@@ -56,8 +57,18 @@ export default function ProjectModel() {
           <span className="drop-overlay-sub">CSV · JSON · Excel</span>
         </div>
       )}
-      {activePlan === "data"  && <GraphCanvas />}
-      {activePlan === "media" && <MediaGraph />}
+      {activePlan === "data" && (
+        <div className="model-stage">
+          <GraphCanvas />
+          <InspectorPanel planType="data" />
+        </div>
+      )}
+      {activePlan === "media" && (
+        <div className="model-stage">
+          <MediaGraph />
+          <InspectorPanel planType="media" />
+        </div>
+      )}
     </div>
   );
 }
