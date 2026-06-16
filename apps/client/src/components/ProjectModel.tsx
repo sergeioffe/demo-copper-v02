@@ -57,11 +57,11 @@ export default function ProjectModel({ style }: { style?: React.CSSProperties })
       <div className="model-head">
         <IconAffiliate size={13} style={{ color: "var(--amber-txt)", flexShrink: 0 }} />
         <button
-          className="panel-max-btn"
+          className={`panel-max-btn${panelFocus === "model" ? " panel-max-btn--active" : ""}`}
           onClick={() => setPanelFocus(panelFocus === "model" ? "none" : "model")}
           title={panelFocus === "model" ? "Restore" : "Expand"}
         >
-          {panelFocus === "model" ? <IconArrowsMinimize size={11} /> : <IconArrowsMaximize size={11} />}
+          {panelFocus === "model" ? <IconArrowsMinimize size={13} /> : <IconArrowsMaximize size={11} />}
         </button>
       </div>
       {dragOver && (

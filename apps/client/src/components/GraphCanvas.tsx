@@ -86,6 +86,14 @@ export default function GraphCanvas() {
 
   const { nodes: positions, graphWidth, graphHeight, div1X, div2X } = computeLayout(dataModel);
 
+  // Merge layout positions with drag overrides (preserves width from layout)
+  const effectivePositions = Object.fromEntries(
+    Object.entries(positions).map(([id, pos]) => {
+      const ov = posOverrides[id];
+      return [id, ov ? { ...pos, x: ov.x, y: ov.y } : pos];
+    })
+  );
+
   // Compute canvas extents accounting for dragged node positions
   const entityIds = dataModel ? Object.keys(dataModel.entities) : [];
   const dynW = entityIds.reduce((mx, id) => {
@@ -178,10 +186,10 @@ export default function GraphCanvas() {
 
         <EdgeLayer
           model={dataModel}
-          positions={positions}
+          positions={effectivePositions}
           sizes={sizes}
-          graphWidth={graphWidth}
-          graphHeight={graphHeight}
+          graphWidth={dynW}
+          graphHeight={dynH}
         />
       </div>
     </div>

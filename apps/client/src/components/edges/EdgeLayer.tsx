@@ -11,7 +11,7 @@ const COLORS = {
 
 function marker(id: string, color: string) {
   return (
-    <marker key={id} id={id} markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+    <marker key={id} id={id} markerWidth="8" markerHeight="8" refX="8" refY="3" orient="auto">
       <path d="M0,0 L0,6 L8,3 z" fill={color} />
     </marker>
   );

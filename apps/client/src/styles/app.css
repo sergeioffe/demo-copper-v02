@@ -433,6 +433,7 @@
   flex-shrink: 0;
 }
 .panel-max-btn:hover { background: var(--bg3); color: var(--txt); }
+.panel-max-btn--active { color: var(--txt); background: var(--bg3); }
 .model-head {
   display: flex;
   align-items: center;

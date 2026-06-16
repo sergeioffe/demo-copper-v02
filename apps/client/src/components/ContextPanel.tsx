@@ -378,11 +378,11 @@ export default function ContextPanel({ style }: { style?: React.CSSProperties })
               </span>
             )}
             <button
-              className="panel-max-btn"
+              className={`panel-max-btn${panelFocus === "context" ? " panel-max-btn--active" : ""}`}
               onClick={() => setPanelFocus(panelFocus === "context" ? "none" : "context")}
               title={panelFocus === "context" ? "Restore" : "Expand"}
             >
-              {panelFocus === "context" ? <IconArrowsMinimize size={11} /> : <IconArrowsMaximize size={11} />}
+              {panelFocus === "context" ? <IconArrowsMinimize size={13} /> : <IconArrowsMaximize size={11} />}
             </button>
           </div>
 

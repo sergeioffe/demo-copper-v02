@@ -17,11 +17,11 @@ export default function PlanDocument({ style }: { style?: React.CSSProperties })
 
   const MaxBtn = () => (
     <button
-      className="panel-max-btn"
+      className={`panel-max-btn${panelFocus === "plan" ? " panel-max-btn--active" : ""}`}
       onClick={() => setPanelFocus(panelFocus === "plan" ? "none" : "plan")}
       title={panelFocus === "plan" ? "Restore" : "Expand"}
     >
-      {panelFocus === "plan" ? <IconArrowsMinimize size={11} /> : <IconArrowsMaximize size={11} />}
+      {panelFocus === "plan" ? <IconArrowsMinimize size={13} /> : <IconArrowsMaximize size={11} />}
     </button>
   );
 
