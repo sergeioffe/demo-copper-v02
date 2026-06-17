@@ -78,9 +78,13 @@ interface State {
   pendingTable: { name: string } | null;
   setPendingTable: (t: { name: string } | null) => void;
 
-  // Node context menu — pending message routed to ContextPanel
+  // Node context menu — pending message routed to ContextPanel (fills textarea only)
   pendingChatMessage: string | null;
   setPendingChatMessage: (msg: string | null) => void;
+
+  // Questionnaire card submit — fills textarea + auto-submits (merges with any typed text)
+  pendingCardSubmit: string | null;
+  setPendingCardSubmit: (text: string | null) => void;
 
   // Direct data-model mutations (no LLM — used by node context menu)
   renameDataEntity: (id: string, name: string) => void;
@@ -118,6 +122,7 @@ export const useStore = create<State>((set, get) => ({
   libraryOpen: false,
   pendingTable: null,
   pendingChatMessage: null,
+  pendingCardSubmit: null,
   ...loadPanelLayout(),
 
   // Derived — read from version each time (no redundant mirrors)
@@ -236,6 +241,7 @@ export const useStore = create<State>((set, get) => ({
 
   setPendingTable: (pendingTable) => set({ pendingTable }),
   setPendingChatMessage: (pendingChatMessage) => set({ pendingChatMessage }),
+  setPendingCardSubmit: (pendingCardSubmit) => set({ pendingCardSubmit }),
 
   renameDataEntity: (id, name) =>
     set((s) => {

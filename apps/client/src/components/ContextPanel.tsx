@@ -99,6 +99,8 @@ export default function ContextPanel({ style }: { style?: React.CSSProperties })
 
   const pendingChatMessage    = useStore((s) => s.pendingChatMessage);
   const setPendingChatMessage = useStore((s) => s.setPendingChatMessage);
+  const pendingCardSubmit     = useStore((s) => s.pendingCardSubmit);
+  const setPendingCardSubmit  = useStore((s) => s.setPendingCardSubmit);
 
   const { launchWizard } = useDocumentHandlers();
 
@@ -109,6 +111,15 @@ export default function ContextPanel({ style }: { style?: React.CSSProperties })
     setPendingChatMessage(null);
     setTimeout(() => textareaRef.current?.focus(), 0);
   }, [pendingChatMessage]);
+
+  // Questionnaire card submit — merge card answers with any typed text and auto-submit
+  useEffect(() => {
+    if (!pendingCardSubmit) return;
+    setPendingCardSubmit(null);
+    const combined = [pendingCardSubmit, input.trim()].filter(Boolean).join("\n\n");
+    setInput("");
+    void doSubmit(combined);
+  }, [pendingCardSubmit]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Load library whenever the project changes
   useEffect(() => {
@@ -237,11 +248,11 @@ export default function ContextPanel({ style }: { style?: React.CSSProperties })
 
   // ── Chat submit ───────────────────────────────────────────────────────────
 
-  async function doSubmit() {
-    const text = input.trim();
+  async function doSubmit(overrideText?: string) {
+    const text = overrideText ?? input.trim();
     if ((!text && attachments.length === 0) || isLoading || thinking || !version) return;
 
-    setInput("");
+    if (!overrideText) setInput("");
     const pendingAttachments = [...attachments];
     setAttachments([]);
 

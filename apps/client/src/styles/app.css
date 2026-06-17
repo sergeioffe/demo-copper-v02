@@ -2614,4 +2614,104 @@
   height: 28px;
 }
 .ck-cf-select:focus, .ck-cf-input:focus { border-color: var(--blue-txt); }
+
+/* ── QuestionnaireCard ───────────────────────────────────────────────────── */
+.ck-q--submitted { opacity: .55; pointer-events: none; }
+.ck-q--submitted .ck-head { background: var(--bg3); }
+
+.ck-q-body { gap: 10px; }
+
+.ck-q-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ck-q-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--txt3);
+}
+
+.ck-q-input {
+  padding: 5px 8px;
+  font-size: 11.5px;
+  border: 1px solid var(--b2);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--txt);
+  font-family: var(--font);
+  outline: none;
+  width: 100%;
+  height: 28px;
+}
+.ck-q-input:focus { border-color: var(--blue-txt); }
+.ck-q-input--date { cursor: pointer; }
+.ck-q-input[type="number"] { -moz-appearance: textfield; }
+.ck-q-input[type="number"]::-webkit-inner-spin-button,
+.ck-q-input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+.ck-q-date-range {
+  display: flex;
+  gap: 8px;
+}
+.ck-q-date-pair {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.ck-q-date-lbl {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--txt3);
+}
+
+.ck-q-select {
+  width: 100%;
+  padding: 5px 8px;
+  font-size: 11.5px;
+  border: 1px solid var(--b2);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--txt);
+  font-family: var(--font);
+  outline: none;
+  cursor: pointer;
+  height: 28px;
+}
+.ck-q-select:focus { border-color: var(--blue-txt); }
+
+.ck-q-multiselect {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.ck-q-ms-opt {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px;
+  border: 1px solid var(--b2);
+  border-radius: 12px;
+  font-size: 11px;
+  color: var(--txt2);
+  cursor: pointer;
+  user-select: none;
+  transition: background .1s, border-color .1s, color .1s;
+}
+.ck-q-ms-opt input[type="checkbox"] { display: none; }
+.ck-q-ms-opt:hover { border-color: var(--blue-bd); background: var(--blue-bg); color: var(--blue-txt); }
+.ck-q-ms-opt--on { border-color: var(--blue-txt); background: var(--blue-bg); color: var(--blue-txt); font-weight: 600; }
+
+.ck-q-actions { align-items: center; margin-top: 2px; }
+.ck-q-hint {
+  font-size: 10px;
+  color: var(--txt3);
+  font-style: italic;
+}
 .ck-cf-input { width: 100%; box-sizing: border-box; }

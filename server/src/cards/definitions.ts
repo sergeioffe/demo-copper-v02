@@ -259,6 +259,28 @@ export const CARD_DEFINITIONS: CardDefinition[] = [
   },
 
   {
+    cardType: "questionnaire",
+    propsSchema: {
+      title: "string?",
+      questions: "Array<{ id: string; label: string; type: 'text'|'number'|'date'|'date-range'|'select'|'multi-select'; placeholder?: string; options?: string[] }>",
+    },
+    exampleProps: {
+      title: "Let's set up your campaign",
+      questions: [
+        { id: "flight", label: "Flight dates", type: "date-range" },
+        { id: "budget", label: "Budget", type: "number", placeholder: "$" },
+        { id: "objective", label: "Objective", type: "select", options: ["Prospecting", "Retargeting", "Brand awareness", "Conversions"] },
+        { id: "partners", label: "Media partners", type: "multi-select", options: ["Meta", "DV360", "The Trade Desk", "Yahoo DSP"] },
+        { id: "kpi", label: "Primary KPI", type: "text", placeholder: "e.g. CTR, ROAS" },
+      ],
+    },
+    allowedActions: [],
+    fallbackText: "To get started, I need a few details about your campaign.",
+    whenToUse: "The user is starting a new campaign, media plan, or planning task and needs to supply several structured inputs at once (dates, budget, objective, partners, formats, KPIs, etc.). Use this INSTEAD of listing questions as a numbered text list — always prefer the card for media-plan intake. The card supports types: text, number, date (single calendar), date-range (from/to calendars), select (dropdown with options[]), multi-select (pill checkboxes with options[]).",
+    whenNotToUse: "Only one simple clarification is needed — ask it in 'reply' text. The user has already provided enough information to proceed. The question is about the data model rather than campaign setup.",
+  },
+
+  {
     cardType: "customFilter",
     propsSchema: {
       columns: "string[]",
