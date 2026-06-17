@@ -74,6 +74,19 @@ interface State {
   setContextW: (w: number) => void;
   setPlanDocW: (w: number) => void;
 
+  // Wizard placeholder — shows ghost node on canvas while LLM round-trip is in flight
+  pendingTable: { name: string } | null;
+  setPendingTable: (t: { name: string } | null) => void;
+
+  // Node context menu — pending message routed to ContextPanel
+  pendingChatMessage: string | null;
+  setPendingChatMessage: (msg: string | null) => void;
+
+  // Direct data-model mutations (no LLM — used by node context menu)
+  renameDataEntity: (id: string, name: string) => void;
+  removeDataEntity: (id: string) => void;
+  duplicateDataEntity: (id: string) => void;
+
   updateDataDocument: (doc: string) => void;
   updateMediaDocument: (doc: string) => void;
   appendExchanges: (exchanges: Exchange[]) => void;
@@ -103,6 +116,8 @@ export const useStore = create<State>((set, get) => ({
   libraryFiles: [],
   libraryFolders: [],
   libraryOpen: false,
+  pendingTable: null,
+  pendingChatMessage: null,
   ...loadPanelLayout(),
 
   // Derived — read from version each time (no redundant mirrors)
@@ -202,6 +217,7 @@ export const useStore = create<State>((set, get) => ({
     set((s) => ({
       version: s.version ? { ...v, context: s.version.context } : v,
       saveStatus: "unsaved" as SaveStatus,
+      pendingTable: null,
     })),
 
   appendExchanges: (exchanges) =>
@@ -215,6 +231,48 @@ export const useStore = create<State>((set, get) => ({
             exchanges: [...s.version.context.exchanges, ...exchanges],
           },
         },
+      };
+    }),
+
+  setPendingTable: (pendingTable) => set({ pendingTable }),
+  setPendingChatMessage: (pendingChatMessage) => set({ pendingChatMessage }),
+
+  renameDataEntity: (id, name) =>
+    set((s) => {
+      const model = s.version?.plans.data.model;
+      if (!model || !model.entities[id]) return {};
+      const entity = model.entities[id];
+      return {
+        version: s.version ? { ...s.version, plans: { ...s.version.plans, data: { ...s.version.plans.data,
+          model: { ...model, entities: { ...model.entities, [id]: { ...entity, name } } } } } } : null,
+        saveStatus: "unsaved" as SaveStatus,
+      };
+    }),
+
+  removeDataEntity: (id) =>
+    set((s) => {
+      const model = s.version?.plans.data.model;
+      if (!model) return {};
+      const { [id]: _r, ...rest } = model.entities;
+      return {
+        version: s.version ? { ...s.version, plans: { ...s.version.plans, data: { ...s.version.plans.data,
+          model: { ...model, entities: rest, connections: model.connections.filter((c) => c.from !== id && c.to !== id) } } } } : null,
+        saveStatus: "unsaved" as SaveStatus,
+        selectedNodeId: s.selectedNodeId === id ? null : s.selectedNodeId,
+      };
+    }),
+
+  duplicateDataEntity: (id) =>
+    set((s) => {
+      const model = s.version?.plans.data.model;
+      if (!model || !model.entities[id]) return {};
+      const orig = model.entities[id];
+      const newId = `${id}_cp${Date.now().toString(36)}`;
+      const copy = { ...orig, name: `${(orig as { name?: string }).name ?? id} (copy)` };
+      return {
+        version: s.version ? { ...s.version, plans: { ...s.version.plans, data: { ...s.version.plans.data,
+          model: { ...model, entities: { ...model.entities, [newId]: copy } } } } } : null,
+        saveStatus: "unsaved" as SaveStatus,
       };
     }),
 

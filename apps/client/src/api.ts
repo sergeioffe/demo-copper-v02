@@ -105,8 +105,9 @@ export function chat(
   exchanges: Exchange[],
   version: Version,
   libraryContext?: import("@copper/contracts").LibraryFile[],
+  opts?: { isWizardCommit?: boolean },
 ): Promise<ChatResponse> {
-  return post<ChatResponse>(`/projects/${id}/chat`, { message, llmModel, exchanges, version, libraryContext });
+  return post<ChatResponse>(`/projects/${id}/chat`, { message, llmModel, exchanges, version, libraryContext, ...opts });
 }
 
 export function listVersions(id: string): Promise<VersionSummary[]> {

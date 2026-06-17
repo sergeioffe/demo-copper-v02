@@ -101,6 +101,16 @@ export function buildWizardShapeFromFile(cf: ContextFile): WizardShape {
     ext === "csv" ? "CSV Upload" : ext === "json" ? "JSON Upload" : "Excel Upload";
   const firstCol = sheet?.columns[0] ?? "id";
   const sampleVals = (sheet?.preview ?? []).slice(0, 2).map((r) => r[0] ?? "").filter(Boolean);
+  const columns = sheet?.columns ?? [];
+  const preview = sheet?.preview ?? [];
+  const rowCount = sheet?.rowCount ?? 0;
+
+  const fieldMappingRows = columns.map((col) => ({
+    fileColumn: col,
+    systemColumn: col.toLowerCase().replace(/\s+/g, "_"),
+    type: "string",
+    required: col === firstCol,
+  }));
 
   return {
     wizard: {
@@ -113,8 +123,8 @@ export function buildWizardShapeFromFile(cf: ContextFile): WizardShape {
             props: {
               tableName,
               sourceLabel,
-              rows: sheet?.rowCount ?? 0,
-              columns: sheet?.columns.length ?? 0,
+              rows: rowCount,
+              columns: columns.length,
               warnings: 0,
               skippedRows: 0,
               isLiveFeed: false,
@@ -135,8 +145,8 @@ export function buildWizardShapeFromFile(cf: ContextFile): WizardShape {
               mode: "single",
               isRecommended: true,
               isValid: true,
-              uniqueValues: sheet?.rowCount ?? 0,
-              totalValues: sheet?.rowCount ?? 0,
+              uniqueValues: rowCount,
+              totalValues: rowCount,
               duplicates: 0,
               missing: 0,
               sampleValues: sampleVals,
@@ -144,8 +154,43 @@ export function buildWizardShapeFromFile(cf: ContextFile): WizardShape {
             },
           },
         },
-        { id: "s4", label: "Field mapping", stub: true },
-        { id: "s5", label: "Schedule",     stub: true },
+        {
+          id: "s4", label: "Field mapping",
+          card: {
+            cardType: "fieldMapping",
+            props: {
+              rows: fieldMappingRows,
+              mappedCount: fieldMappingRows.length,
+              totalCount: fieldMappingRows.length,
+              typeWarnings: 0,
+            },
+          },
+        },
+        {
+          id: "s5", label: "Import settings",
+          card: {
+            cardType: "importSettings",
+            props: {
+              tableName,
+              sourceLabel,
+              refreshMode: "manual",
+              scheduleLabel: "Not scheduled",
+            },
+          },
+        },
+        {
+          id: "s6", label: "Preview",
+          card: {
+            cardType: "tablePreview",
+            props: {
+              tableName,
+              rowsCount: rowCount,
+              columns,
+              rows: preview,
+              pageSize: 5,
+            },
+          },
+        },
       ],
       commit: { label: "Import" },
     },

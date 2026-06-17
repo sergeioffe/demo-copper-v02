@@ -55,6 +55,24 @@ function buildCallbacks(
         onCancel: () => patch({ _applied: false }),
         onEdit:   () => {},
       };
+    case "sourceInput":
+      return { onSelect: (id: string) => patch({ selectedSourceId: id }) };
+    case "fieldMapping": {
+      const rows = (mergedProps(step, draft).rows ?? []) as Array<Record<string, unknown>>;
+      return {
+        onChangeMapping: (idx: number, systemColumn: string) =>
+          patch({ rows: rows.map((r, i) => (i === idx ? { ...r, systemColumn } : r)) }),
+      };
+    }
+    case "importSettings":
+      return { onEdit: () => {}, onSave: () => {} };
+    case "tablePreview":
+      return { onSave: () => {} };
+    case "customFilter":
+      return {
+        onApply:  (col: string, op: string, val: string) => patch({ selectedColumn: col, selectedOperator: op, value: val, _applied: true }),
+        onCancel: () => patch({ _applied: false }),
+      };
     default:
       return {};
   }
@@ -217,10 +235,20 @@ export function WizardSurface() {
   const mergeServerVersion = useStore((s) => s.mergeServerVersion);
   const setLoading         = useStore((s) => s.setLoading);
   const openWizard         = useStore((s) => s.openWizard);
+  const setPendingTable    = useStore((s) => s.setPendingTable);
 
   async function onCommit(shape: WizardShape, draft: Draft) {
     if (!version) return;
     const text = buildCommitMessage(shape, draft);
+
+    // Plant a ghost node on the canvas immediately so the user sees something
+    const discoveryStep = shape.wizard.steps.find((s) => s.card?.cardType === "tableDiscovery");
+    if (discoveryStep) {
+      const props = mergedProps(discoveryStep, draft);
+      const name = (props.tableName as string | undefined) ?? "Table";
+      setPendingTable({ name });
+    }
+
     const ts   = new Date().toISOString();
     const userEx: Exchange = {
       id: `ex_u_${Date.now()}`,
@@ -232,13 +260,14 @@ export function WizardSurface() {
     appendExchanges([userEx]);
     setLoading(true);
     try {
-      const result = await chat(version.id!, text, llmModel, [...exchanges, userEx], version);
+      const result = await chat(version.id!, text, llmModel, [...exchanges, userEx], version, undefined, { isWizardCommit: true });
       appendExchanges([result.exchange]);
-      if (result.version) mergeServerVersion(result.version);
+      if (result.version) mergeServerVersion(result.version); // also clears pendingTable
       if (result.wizard)  openWizard(result.wizard);
     } catch (err) {
       console.error("[wizard commit]", err);
     } finally {
+      setPendingTable(null); // safety fallback if no version returned
       setLoading(false);
     }
   }

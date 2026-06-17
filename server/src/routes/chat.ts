@@ -6,7 +6,7 @@ import type { LibraryContentBlock } from "../llm/router.js";
 import { routeLLM } from "../llm/router.js";
 import { buildSystemPrompt } from "../llm/systemPrompt.js";
 import { applyOps } from "../llm/applyOps.js";
-import { detectWizardIntent, getWizardShape } from "../wizardStandin.js";
+import { detectWizardIntent, buildWizardShapeFromIntent } from "../wizardStandin.js";
 
 // MIME types supported as Claude document blocks
 const CLAUDE_DOC_MIMES: Record<string, string> = {
@@ -67,30 +67,32 @@ export function makeChatRouter(store: ProjectStore, getKB: () => string = () => 
       exchanges = [],
       version: clientVersion,
       libraryContext = [],
+      isWizardCommit = false,
     } = req.body as {
       message: string;
       llmModel?: string;
       exchanges?: Exchange[];
       version?: Version;
       libraryContext?: LibraryFile[];
+      isWizardCommit?: boolean;
     };
 
     if (!message?.trim()) return res.status(400).json({ error: "message required" });
 
-    // Stand-in engine seam: return a wizard shape when intent is detected.
-    // Replace this block with real LLM-driven wizard generation in M3.
-    if (detectWizardIntent(message)) {
+    // Stand-in engine seam: return a wizard shape when table-creation intent is detected.
+    // isWizardCommit skips this so the wizard's own commit message goes straight to the LLM.
+    if (!isWizardCommit && detectWizardIntent(message)) {
       const assistantExchange: Exchange = {
         id: `ex_a_${Date.now()}`,
         role: "assistant",
-        text: "Let me walk you through this — here's the setup wizard.",
+        text: "Let me walk you through adding this table — here's the setup wizard.",
         status: "success",
         startedAt: new Date().toISOString(),
         responseTimeMs: 0,
         llmModel,
         planType: null,
       };
-      return res.json({ exchange: assistantExchange, version: null, wizard: getWizardShape() });
+      return res.json({ exchange: assistantExchange, version: null, wizard: buildWizardShapeFromIntent(message) });
     }
 
     const projectId = req.params.id;
@@ -127,13 +129,17 @@ export function makeChatRouter(store: ProjectStore, getKB: () => string = () => 
     let llmCard: { cardType: string; props: Record<string, unknown> } | null = null;
     const startedAt = new Date().toISOString();
 
+    console.log(`[chat] ▶ ${projectId} | model:${llmModel} | msg(${message.length}ch): "${message.slice(0, 200)}${message.length > 200 ? "…" : ""}"`);
+    if (libraryContext.length > 0) {
+      console.log(`[chat] library ctx: ${libraryContent.length} doc-block(s) [${libraryContent.map(b => b.name).join(", ")}] + ${metadataOnly.length} metadata-only [${metadataOnly.map(f => f.name).join(", ")}]`);
+    }
+
     try {
       const result = await routeLLM({ llmModel, systemPrompt, userMessage, libraryContent });
 
       llmReply = result.reply ?? result.summary ?? "Done.";
-      ops = ((result.ops ?? []) as Intent[]).filter(
-        (o) => o && typeof o === "object" && "op" in o,
-      );
+      const rawOps = (result.ops ?? []) as Intent[];
+      ops = rawOps.filter((o) => o && typeof o === "object" && "op" in o);
       reasoning = result.reasoning ?? {
         problem: message,
         solution: llmReply,
@@ -141,8 +147,13 @@ export function makeChatRouter(store: ProjectStore, getKB: () => string = () => 
         alternativesConsidered: [],
       };
       llmCard = result.card ?? null;
+
+      console.log(`[chat] ops(${ops.length}):`, ops.length > 0 ? JSON.stringify(ops) : "none");
+      if (rawOps.length !== ops.length) {
+        console.warn(`[chat] ⚠ ${rawOps.length - ops.length} op(s) dropped (malformed):`, JSON.stringify(rawOps.filter(o => !(o && typeof o === "object" && "op" in o))));
+      }
     } catch (err) {
-      console.error("[chat] LLM call failed:", (err as Error).message);
+      console.error("[chat] LLM call failed:", err);
       return res.status(500).json({ error: `LLM error: ${(err as Error).message}` });
     }
 
@@ -201,11 +212,17 @@ export function makeChatRouter(store: ProjectStore, getKB: () => string = () => 
       ...(llmCard ? { card: llmCard } : {}),
     };
 
-    if (libraryContext.length > 0) {
-      console.log(`[chat] library: ${libraryContent.length} doc blocks + ${metadataOnly.length} metadata-only`);
+    const addEntityOps = ops.filter(o => o.op === "addEntity");
+    if (addEntityOps.length > 0) {
+      for (const op of addEntityOps) {
+        if (op.op === "addEntity" && op.entity && "fields" in op.entity) {
+          const ent = op.entity as { type: string; name: string; fields?: unknown[] };
+          console.log(`[chat] addEntity: ${ent.type} "${ent.name}" fields(${ent.fields?.length ?? 0}):`, JSON.stringify(ent.fields));
+        }
+      }
     }
     console.log(
-      `[chat] ✅ ${projectId} v${version.version}→v${newVersion.version} | ops:${ops.length} versioned:${versioned}`,
+      `[chat] ✅ ${projectId} v${version.version}→v${newVersion.version} | model:${llmModel} | ops:${ops.length} versioned:${versioned}`,
     );
 
     res.json({ exchange, version: versioned ? newVersion : null });

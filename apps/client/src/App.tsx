@@ -3,7 +3,6 @@ import { Routes, Route, Link, useLocation } from "react-router-dom";
 import { useStore } from "./store.js";
 import { APP_VERSION } from "./version.js";
 import { listProjects, loadProject, createProject } from "./api.js";
-import { getWizardShape } from "./wizardStandin.js";
 import ContextPanel from "./components/ContextPanel.js";
 import PlanDocument from "./components/PlanDocument.js";
 import ProjectModel from "./components/ProjectModel.js";
@@ -25,7 +24,6 @@ import {
   IconBug,
   IconHistory,
   IconSettings,
-  IconWand,
   IconMessage,
   IconFileText,
   IconLayoutColumns,
@@ -200,7 +198,6 @@ function MainApp() {
   const setAvailableProjects = useStore((s) => s.setAvailableProjects);
   const loadVersionStore  = useStore((s) => s.loadVersion);
   const saveNow           = useStore((s) => s.saveNow);
-  const openWizard        = useStore((s) => s.openWizard);
   const panelFocus        = useStore((s) => s.panelFocus);
   const contextW          = useStore((s) => s.contextW);
   const planDocW          = useStore((s) => s.planDocW);
@@ -265,10 +262,6 @@ function MainApp() {
           <span className="brand-v">v2</span>
         </Link>
         <span className="build-version">{APP_VERSION}</span>
-        <button className="icon-btn icon-btn--demo-wiz" onClick={() => openWizard(getWizardShape())} title="Demo wizard (stand-in)">
-          <IconWand size={14} />
-          Demo Wizard
-        </button>
         <div className="sep" />
 
         {version ? (

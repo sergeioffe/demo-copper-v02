@@ -97,7 +97,18 @@ export default function ContextPanel({ style }: { style?: React.CSSProperties })
   const panelFocus         = useStore((s) => s.panelFocus as PanelFocus);
   const setPanelFocus      = useStore((s) => s.setPanelFocus);
 
+  const pendingChatMessage    = useStore((s) => s.pendingChatMessage);
+  const setPendingChatMessage = useStore((s) => s.setPendingChatMessage);
+
   const { launchWizard } = useDocumentHandlers();
+
+  // Auto-fill input when a node context menu sends a message
+  useEffect(() => {
+    if (!pendingChatMessage) return;
+    setInput(pendingChatMessage);
+    setPendingChatMessage(null);
+    setTimeout(() => textareaRef.current?.focus(), 0);
+  }, [pendingChatMessage]);
 
   // Load library whenever the project changes
   useEffect(() => {

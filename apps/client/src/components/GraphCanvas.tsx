@@ -7,6 +7,7 @@ import { FilterEntityNode, AlgoAIEntityNode } from "./nodes/FilterNode.js";
 import ImportNode from "./nodes/ImportNode.js";
 import OutputNode from "./nodes/OutputNode.js";
 import EdgeLayer from "./edges/EdgeLayer.js";
+import NodeContextMenu from "./NodeContextMenu.js";
 import type { DataPlanEntity } from "@copper/contracts";
 
 const DP_POSITIONS_KEY = "copper-dp-positions";
@@ -21,6 +22,11 @@ export default function GraphCanvas() {
   const dataModel    = useStore((s) => s.dataModel());
   const selectedNodeId = useStore((s) => s.selectedNodeId);
   const selectNode   = useStore((s) => s.selectNode);
+  const pendingTable = useStore((s) => s.pendingTable);
+  const setPendingChatMessage = useStore((s) => s.setPendingChatMessage);
+  const renameDataEntity  = useStore((s) => s.renameDataEntity);
+  const removeDataEntity  = useStore((s) => s.removeDataEntity);
+  const duplicateDataEntity = useStore((s) => s.duplicateDataEntity);
 
   const [sizes, setSizes] = useState<Record<string, number>>({});
   const nodeRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -30,6 +36,7 @@ export default function GraphCanvas() {
   const [posOverrides, setPosOverrides] = useState<Record<string, { x: number; y: number }>>(() => loadDPPositions());
   const draggingNode = useRef<{ id: string; sx: number; sy: number; ox: number; oy: number } | null>(null);
   const nodeDragged = useRef(false);
+  const [activePrompt, setActivePrompt] = useState<{ id: string; entity: DataPlanEntity; x: number; y: number } | null>(null);
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => { if (e.key === "Alt") { e.preventDefault(); setAltHeld(true); } };
@@ -127,7 +134,23 @@ export default function GraphCanvas() {
 
   function clickNode(id: string) {
     if (dragActive.current || altHeld || nodeDragged.current) return;
-    selectNode(selectedNodeId === id ? null : id);
+    if (selectedNodeId === id) {
+      // Second click on same node — toggle off
+      selectNode(null);
+      setActivePrompt(null);
+      return;
+    }
+    selectNode(id);
+    const entities = dataModel?.entities;
+    const entity = entities?.[id];
+    if (entity) {
+      const ep = posOverrides[id] ?? positions[id];
+      if (ep) {
+        setActivePrompt({ id, entity, x: ep.x, y: ep.y + (sizes[id] ?? 60) + 8 });
+      }
+    } else {
+      setActivePrompt(null);
+    }
   }
 
   if (!dataModel) {
@@ -191,6 +214,34 @@ export default function GraphCanvas() {
           graphWidth={dynW}
           graphHeight={dynH}
         />
+
+        {pendingTable && (
+          <PendingTableNode
+            name={pendingTable.name}
+            x={div1X + 20}
+            y={(() => {
+              // Place below the last Table node in the flow region, or at top
+              const tableNodeYs = Object.entries(positions)
+                .filter(([id]) => dataModel?.entities[id]?.type === "Table")
+                .map(([id]) => (posOverrides[id] ?? positions[id]).y + (sizes[id] ?? 80));
+              return tableNodeYs.length > 0 ? Math.max(...tableNodeYs) + 12 : 30;
+            })()}
+          />
+        )}
+
+        {activePrompt && (
+          <NodeContextMenu
+            nodeId={activePrompt.id}
+            entity={activePrompt.entity}
+            x={activePrompt.x}
+            y={activePrompt.y}
+            onSend={(msg) => { setPendingChatMessage(msg); }}
+            onRename={(name) => renameDataEntity(activePrompt.id, name)}
+            onDelete={() => removeDataEntity(activePrompt.id)}
+            onDuplicate={() => duplicateDataEntity(activePrompt.id)}
+            onDismiss={() => { setActivePrompt(null); selectNode(null); }}
+          />
+        )}
       </div>
     </div>
   );
@@ -220,4 +271,19 @@ function renderEntity(
         </div>
       );
   }
+}
+
+function PendingTableNode({ name, x, y }: { name: string; x: number; y: number }) {
+  return (
+    <div className="node node-pending-table" style={{ position: "absolute", left: x, top: y }}>
+      <div className="node-pending-header">
+        <span className="node-pending-type">TABLE</span>
+        <span className="node-pending-name">{name}</span>
+      </div>
+      <div className="node-pending-body">
+        <span className="node-pending-spinner" />
+        <span className="node-pending-label">Adding to model…</span>
+      </div>
+    </div>
+  );
 }

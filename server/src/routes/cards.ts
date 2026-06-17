@@ -95,16 +95,20 @@ export async function ensureCardsSeedded(): Promise<void> {
   }
 
   try {
-    await s.read(`${UXCARDS_PREFIX}meta.json`);
-    console.log("[cards] ✅ Card definitions already in GCS — skipping seed");
-  } catch {
-    console.log("[cards] ⏳ Seeding card definitions to GCS…");
-    try {
-      const written = await runSeed(s, "seed");
-      console.log(`[cards] ✅ Seeded ${written.length} files to knowledge/ux-cards/`);
-    } catch (err) {
-      console.warn(`[cards] ⚠️  Seed failed: ${(err as Error).message}`);
+    const existing = await readDefinitionsFromGCS(s);
+    if (existing.length >= CARD_DEFINITIONS.length) {
+      console.log(`[cards] ✅ Card definitions in GCS (${existing.length}) — skipping seed`);
+      return;
     }
+    console.log(`[cards] ⏳ GCS has ${existing.length} cards, bundled has ${CARD_DEFINITIONS.length} — re-seeding…`);
+  } catch {
+    console.log("[cards] ⏳ Seeding card definitions to GCS (first run)…");
+  }
+  try {
+    const written = await runSeed(s, "seed");
+    console.log(`[cards] ✅ Seeded ${CARD_DEFINITIONS.length} cards (${written.length} files) to knowledge/ux-cards/`);
+  } catch (err) {
+    console.warn(`[cards] ⚠️  Seed failed: ${(err as Error).message}`);
   }
 }
 
