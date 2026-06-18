@@ -87,6 +87,8 @@ Then kill the Vite process, delete `apps/client/node_modules/.vite`, and restart
 
 **Never deploy to Railway unless the user explicitly asks.** "Push" in this project means `git push` only.
 
+**Railway is intentionally NOT connected to GitHub.** A `git push` never triggers a Railway deploy. Never assume a push caused a deployment. To deploy, always run `railway up --detach` explicitly via the CLI. Verify the deploy started by checking `railway deployment list`.
+
 ---
 
 ## Open decisions (flagged, not resolved)
