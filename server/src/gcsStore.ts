@@ -17,10 +17,6 @@ export class GCSProjectStore implements ProjectStore {
     this.inner = new ProjectStoreGCS(this.gcsProvider);
   }
 
-  async validate(): Promise<void> {
-    await this.gcsProvider.validate();
-  }
-
   async listProjects(): Promise<ProjectSummary[]> {
     return this.inner.listProjects();
   }

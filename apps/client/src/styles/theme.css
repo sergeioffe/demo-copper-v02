@@ -7,69 +7,111 @@
 }
 
 :root {
+  /* ── Synapse slate ramp ── */
+  --grey-50:  #F8FAFC;
+  --grey-100: #F1F5F9;
+  --grey-200: #E2E8F0;
+  --grey-300: #CBD5E1;
+  --grey-400: #94A3B8;
+  --grey-500: #64748B;
+  --grey-600: #475569;
+  --grey-700: #334155;
+
+  /* ── Synapse blue (primary / interactive) ── */
+  --blue-50:  #EFF6FF;
+  --blue-100: #DBEAFE;
+  --blue-600: #2563EB;
+  --blue-700: #1D4ED8;
+
+  /* ── Synapse status primitives ── */
+  --orange-100: #FFEDD5;
+  --orange-500: #F97316;
+  --orange-600: #EA580C;
+  --green-100:  #D1FAE5;
+  --green-600:  #059669;
+  --green-700:  #047857;
+  --red-100:    #FEE2E2;
+  --red-500:    #EF4444;
+  --red-600:    #DC2626;
+  --purple-100: #EDE9FE;
+  --purple-400: #9747FF;
+  --purple-500: #7B61FF;
+
   /* ── surfaces ── */
-  --bg: #ffffff;        /* panels, cards */
-  --bg2: #fbfcfd;       /* secondary fill */
-  --bg3: #f6f7f9;       /* app background */
-  --bg4: #eef0f5;       /* hover / recessed */
+  --bg:  #ffffff;
+  --bg2: var(--grey-50);
+  --bg3: var(--grey-100);
+  --bg4: var(--grey-200);
 
   /* ── ink ── */
-  --txt: #1a1d24;
-  --txt2: #6a7180;
-  --txt3: #9aa1ae;
+  --txt:  var(--grey-700);
+  --txt2: var(--grey-500);
+  --txt3: var(--grey-400);
 
   /* ── borders ── */
-  --b: #e5e8ee;
-  --b2: #d6dae3;
-  --b3: #bcc2cc;
+  --b:  var(--grey-200);
+  --b2: var(--grey-300);
+  --b3: var(--grey-300);
 
-  /* ── accent (the one saturated UI color) ── */
-  --blue-bg: #eceefb;   /* accent-wash */
-  --blue-txt: #4856c8;  /* accent */
-  --blue-bd: #c8cef4;   /* accent-line */
+  /* ── blue accent ── */
+  --blue-bg:  var(--blue-50);
+  --blue-txt: var(--blue-600);
+  --blue-bd:  var(--blue-100);
 
-  /* ── semantic colors ── */
-  --teal-bg: #e1f5ee;
-  --teal-txt: #0f6e56;
-  --teal-bd: #1d9e75;
-  --amber-bg: #faeeda;
-  --amber-txt: #854f0b;
-  --amber-bd: #ba7517;
-  --green-bg: #eaf3de;
-  --green-txt: #3b6d11;
-  --green-bd: #639922;
-  --coral-bg: #faece7;
-  --coral-txt: #993c1d;
-  --coral-bd: #d85a30;
-  --purple-bg: #eeedfe;
-  --purple-txt: #534ab7;
-  --purple-bd: #7f77dd;
-  --ok-bg: #eaf3de;
-  --ok-txt: #3b6d11;
-  --warn-bg: #faeeda;
-  --warn-txt: #854f0b;
+  /* ── status: warning ── */
+  --amber-bg:  var(--orange-100);
+  --amber-txt: var(--orange-500);
+  --amber-bd:  var(--orange-600);
 
-  /* ── file-type colors (document previews & chips only) ── */
-  --type-docx: #2b579a;
-  --type-xlsx: #1e7145;
-  --type-pptx: #c24f2c;
-  --type-pdf:  #c8312b;
-  --type-md:   #54607a;
+  /* ── status: success ── */
+  --green-bg:  var(--green-100);
+  --green-txt: var(--green-600);
+  --green-bd:  var(--green-700);
+
+  /* ── status: danger ── */
+  --coral-bg:  var(--red-100);
+  --coral-txt: var(--red-500);
+  --coral-bd:  var(--red-600);
+
+  /* ── status: AI ── */
+  --purple-bg:  var(--purple-100);
+  --purple-txt: var(--purple-500);
+  --purple-bd:  var(--purple-400);
+
+  /* ── teal → green (no teal in Synapse) ── */
+  --teal-bg:  var(--green-100);
+  --teal-txt: var(--green-600);
+  --teal-bd:  var(--green-700);
+
+  /* ── ok / warn shortcuts ── */
+  --ok-bg:    var(--green-100);
+  --ok-txt:   var(--green-600);
+  --warn-bg:  var(--orange-100);
+  --warn-txt: var(--orange-500);
+
+  /* ── file-type colors ── */
+  --type-docx: var(--blue-700);
+  --type-xlsx: var(--green-600);
+  --type-pptx: var(--orange-600);
+  --type-pdf:  var(--red-500);
+  --type-md:   var(--grey-600);
 
   /* ── typography ── */
-  --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-  --mono: "SF Mono", ui-monospace, "JetBrains Mono", "Roboto Mono", Menlo, monospace;
-  --hl: #f0a020;
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  --mono: 'Space Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  --hl: var(--orange-500);
 
-  /* ── elevation & radius ── */
-  --shadow-card:  0 6px 14px -8px rgba(20,24,40,.34);
-  --shadow-panel: 0 24px 60px -28px rgba(20,24,40,.30);
-  --radius-sm: 6px;
+  /* ── elevation ── */
+  --shadow-card:  0px 1px 2px 0px rgba(0, 0, 0, 0.05);
+  --shadow-panel: 0px 4px 12px 0px rgba(23, 24, 58, 0.14);
+
+  /* ── radius ── */
+  --radius-sm: 4px;
   --radius:    8px;
   --radius-lg: 12px;
 }
 
-/* ── file-type cascade helper ─────────────────────────────────────── */
+/* ── file-type cascade helper ── */
 [data-type="docx"] { --tc: var(--type-docx); }
 [data-type="xlsx"] { --tc: var(--type-xlsx); }
 [data-type="pptx"] { --tc: var(--type-pptx); }
@@ -161,7 +203,7 @@ html, body {
 .save-chip--unsaved { color: var(--coral-txt); border-color: var(--coral-bd); background: var(--coral-bg); }
 .save-chip--saved   { color: var(--txt3); }
 .save-chip--btn     { cursor: pointer; font-family: var(--font); background: transparent; }
-.save-chip--btn:hover { filter: brightness(1.1); }
+.save-chip--btn:hover { filter: brightness(.95); }
 
 /* ── PROJECT PICKER ── */
 .project-picker { position: relative; }
@@ -193,7 +235,7 @@ html, body {
   background: var(--bg);
   border: 1px solid var(--b2);
   border-radius: 8px;
-  box-shadow: 0 4px 16px rgba(0,0,0,.15);
+  box-shadow: var(--shadow-panel);
   z-index: 100;
   overflow: hidden;
   padding: 4px 0;
@@ -226,8 +268,9 @@ html, body {
   gap: 4px;
   font-family: var(--font);
   white-space: nowrap;
+  transition: background .12s ease, border-color .12s ease;
 }
-.btn:hover { background: var(--bg2); }
+.btn:hover { background: var(--bg2); border-color: var(--b2); }
 .btn:disabled { opacity: 0.45; cursor: not-allowed; }
 .icon-btn {
   height: 28px;
@@ -244,6 +287,7 @@ html, body {
   font-weight: 500;
   flex-shrink: 0;
   white-space: nowrap;
+  transition: background .12s ease, color .12s ease;
 }
 .icon-btn:hover { background: var(--bg2); color: var(--txt); }
 .icon-btn.active { background: var(--blue-bg); color: var(--blue-txt); border-color: var(--blue-bd); }
@@ -257,6 +301,7 @@ html, body {
   font-family: var(--font);
   cursor: pointer;
   outline: none;
+  transition: border-color .12s ease;
 }
 .sel:hover { border-color: var(--b3); }
 
@@ -287,9 +332,9 @@ html, body {
 
 /* Region bands */
 .region-band { position: absolute; top: 0; bottom: 0; }
-.input-band  { left: 0; background: linear-gradient(180deg, rgba(55,138,221,.04) 0%, transparent 200px); }
-.flow-band   { background: linear-gradient(180deg, rgba(83,74,183,.04) 0%, transparent 200px); }
-.output-band { right: 0; background: linear-gradient(180deg, rgba(99,153,34,.04) 0%, transparent 200px); }
+.input-band  { left: 0; background: linear-gradient(180deg, rgba(37,99,235,.05) 0%, transparent 200px); }
+.flow-band   { background: linear-gradient(180deg, rgba(123,97,255,.05) 0%, transparent 200px); }
+.output-band { right: 0; background: linear-gradient(180deg, rgba(5,150,105,.05) 0%, transparent 200px); }
 .region-divider { position: absolute; top: 0; bottom: 0; width: 0; border-left: 1.5px dashed var(--b2); }
 .region-label   { position: absolute; top: 12px; font-size: 10px; font-weight: 700; letter-spacing: .11em; text-transform: uppercase; display: flex; align-items: center; gap: 5px; }
 .rl-input  { color: var(--blue-txt); }
@@ -304,7 +349,7 @@ html, body {
   background: var(--bg);
   border: 1px solid var(--blue-bd);
   border-radius: 10px;
-  box-shadow: 0 1px 3px rgba(0,0,0,.05);
+  box-shadow: var(--shadow-card);
   width: 180px;
 }
 .node-import:hover { box-shadow: 0 3px 12px rgba(0,0,0,.1); }
@@ -324,7 +369,7 @@ html, body {
   background: var(--bg);
   border: 1px solid var(--b2);
   border-radius: 10px;
-  box-shadow: 0 1px 3px rgba(0,0,0,.05);
+  box-shadow: var(--shadow-card);
   width: 188px;
 }
 .node-table:hover { box-shadow: 0 3px 12px rgba(0,0,0,.1); }
@@ -354,20 +399,20 @@ html, body {
 .node-flow {
   width: 160px;
   background: var(--bg);
-  border: 1.5px solid var(--teal-bd);
+  border: 1.5px solid var(--amber-bd);
   border-radius: 40px 14px 14px 40px;
-  box-shadow: 0 1px 4px rgba(0,0,0,.07);
+  box-shadow: var(--shadow-card);
   display: flex; align-items: center; gap: 9px;
   padding: 9px 13px 9px 9px;
 }
 .node-flow:hover { box-shadow: 0 3px 12px rgba(0,0,0,.12); }
-.node-flow.selected { box-shadow: 0 0 0 2px var(--teal-bg); }
+.node-flow.selected { box-shadow: 0 0 0 2px var(--amber-bg); }
 .node-flow.algo { border-color: var(--purple-bd); }
 .node-flow.algo.selected { box-shadow: 0 0 0 2px var(--purple-bg); }
 .flow-disc {
   width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
-  background: var(--teal-bg); color: var(--teal-txt);
+  background: var(--amber-bg); color: var(--amber-txt);
 }
 .node-flow.algo .flow-disc { background: var(--purple-bg); color: var(--purple-txt); }
 .flow-meta { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
@@ -383,7 +428,7 @@ html, body {
   background: var(--bg);
   border: 1px solid var(--green-bd);
   border-radius: 10px;
-  box-shadow: 0 1px 3px rgba(0,0,0,.05);
+  box-shadow: var(--shadow-card);
   width: 360px;
 }
 .node-output:hover { box-shadow: 0 3px 12px rgba(0,0,0,.1); }
@@ -408,7 +453,7 @@ html, body {
 .of-name { font-family: var(--mono); font-size: 11px; font-weight: 700; }
 .src-chip { display: inline-flex; align-items: center; gap: 4px; font-family: var(--mono); font-size: 10px; border-radius: 5px; padding: 2px 6px; background: var(--bg3); border: 1px solid var(--b2); color: var(--txt2); }
 
-/* ── CONTEXT PANEL ── */
+/* ── CONTEXT PANEL (legacy v1) ── */
 .ctx-panel {
   width: 300px;
   flex-shrink: 0;
@@ -454,7 +499,7 @@ html, body {
 .chat-input:focus { border-color: var(--blue-bd); }
 .chat-send {
   width: 30px; height: 30px; border-radius: 8px;
-  background: var(--txt); color: var(--bg); border: none;
+  background: var(--blue-txt); color: #fff; border: none;
   cursor: pointer; display: flex; align-items: center; justify-content: center;
   flex-shrink: 0; align-self: flex-end;
 }
@@ -534,7 +579,7 @@ html, body {
 /* ── SUBPANELS ── */
 .subpanels { flex: 1; display: flex; min-height: 0; }
 
-/* ── PLAN DOCUMENT ── */
+/* ── PLAN DOCUMENT (legacy) ── */
 .plandoc {
   width: 380px; flex-shrink: 0; background: var(--bg);
   border-right: 1px solid var(--b); display: flex;
@@ -608,7 +653,7 @@ html, body {
 .mg-ck.on { background: var(--blue-txt); border-color: var(--blue-txt); }
 .mg-xb { width: 20px; height: 20px; border-radius: 3px; border: 1px solid var(--b2); background: var(--bg); color: var(--txt3); cursor: pointer; font-size: 9px; display: inline-flex; align-items: center; justify-content: center; position: relative; }
 .mg-xb:hover, .mg-xb.on { background: var(--blue-bg); border-color: var(--blue-bd); color: var(--blue-txt); }
-.mg-xmenu { position: absolute; left: 0; top: 23px; background: var(--bg); border: 1px solid var(--b2); border-radius: 6px; box-shadow: 0 4px 14px rgba(0,0,0,.12); z-index: 200; min-width: 150px; padding: 3px; }
+.mg-xmenu { position: absolute; left: 0; top: 23px; background: var(--bg); border: 1px solid var(--b2); border-radius: 6px; box-shadow: var(--shadow-panel); z-index: 200; min-width: 150px; padding: 3px; }
 .mg-xopt { display: flex; align-items: center; gap: 7px; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; color: var(--txt2); white-space: nowrap; }
 .mg-xopt:hover, .mg-xopt.on { background: var(--blue-bg); color: var(--blue-txt); }
 .mg-xdot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
@@ -646,7 +691,7 @@ html, body {
 .gn-card {
   background: var(--bg); border-radius: 6px; border: 1.5px solid var(--b);
   border-left-width: 3px; padding: 6px 8px; cursor: pointer;
-  box-shadow: 0 1px 3px rgba(0,0,0,.05); user-select: none; transition: all .1s; overflow: hidden;
+  box-shadow: var(--shadow-card); user-select: none; transition: all .1s; overflow: hidden;
 }
 .gn-card:hover { border-color: var(--blue-bd); }
 .gn-card.sel { border-color: var(--blue-txt); background: var(--blue-bg); box-shadow: 0 0 0 3px rgba(37,99,235,.12); }
@@ -664,7 +709,7 @@ html, body {
 
 /* ── LOADING ── */
 .loading-overlay {
-  position: fixed; inset: 0; background: rgba(240,238,234,.85);
+  position: fixed; inset: 0; background: rgba(241,245,249,.88);
   display: flex; align-items: center; justify-content: center; z-index: 500;
 }
 .loading-spinner {
