@@ -10,11 +10,7 @@
   "scripts": {
     "dev": "npm run dev --workspace=server & npm run dev --workspace=apps/client",
     "build": "npm run build --workspaces --if-present",
-    "typecheck": "tsc --build",
-    "postinstall": "patch-package"
-  },
-  "dependencies": {
-    "patch-package": "^8.0.1"
+    "typecheck": "tsc --build"
   },
   "devDependencies": {
     "typescript": "^5.6.0"

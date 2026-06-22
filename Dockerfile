@@ -12,6 +12,8 @@ COPY server/package*.json ./server/
 COPY apps/client/package*.json ./apps/client/
 
 RUN npm ci
+# Fix deprecated gtoken OAuth2 endpoint (gtoken 7.x hardcodes the old v4 URL)
+RUN sed -i "s|https://www.googleapis.com/oauth2/v4/token|https://oauth2.googleapis.com/token|g" node_modules/gtoken/build/src/index.js
 
 # Copy all source
 COPY packages/ ./packages/
@@ -37,6 +39,8 @@ COPY packages/project-store/package*.json ./packages/project-store/
 COPY packages/intelligence/package*.json ./packages/intelligence/
 COPY server/package*.json ./server/
 RUN npm ci --omit=dev --workspace=server --include-workspace-root
+# Fix deprecated gtoken OAuth2 endpoint (gtoken 7.x hardcodes the old v4 URL)
+RUN sed -i "s|https://www.googleapis.com/oauth2/v4/token|https://oauth2.googleapis.com/token|g" node_modules/gtoken/build/src/index.js
 
 # Compiled server + packages + runtime data files the server reads directly
 COPY --from=build /app/server/dist ./server/dist
