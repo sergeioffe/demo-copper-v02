@@ -1,0 +1,13 @@
+diff --git a/node_modules/gtoken/build/src/index.js b/node_modules/gtoken/build/src/index.js
+index bf45042..d8b283d 100644
+--- a/node_modules/gtoken/build/src/index.js
++++ b/node_modules/gtoken/build/src/index.js
+@@ -30,7 +30,7 @@ const readFile = fs.readFile
+         // if running in the web-browser, fs.readFile may not have been shimmed.
+         throw new ErrorWithCode('use key rather than keyFile.', 'MISSING_CREDENTIALS');
+     };
+-const GOOGLE_TOKEN_URL = 'https://www.googleapis.com/oauth2/v4/token';
++const GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token';
+ const GOOGLE_REVOKE_TOKEN_URL = 'https://accounts.google.com/o/oauth2/revoke?token=';
+ class ErrorWithCode extends Error {
+     constructor(message, code) {
