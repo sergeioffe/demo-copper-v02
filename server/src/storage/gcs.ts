@@ -1,4 +1,5 @@
 import { Storage } from "@google-cloud/storage";
+import { JWT } from "google-auth-library";
 
 export class GCSStorageProvider {
   private _bucket: ReturnType<Storage["bucket"]>;
@@ -10,13 +11,22 @@ export class GCSStorageProvider {
     this._bucketName = process.env.GCS_BUCKET ?? "demo_activation";
     const raw = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
     if (!raw) throw new Error("[storage/gcs] GOOGLE_SERVICE_ACCOUNT_JSON env var is not set");
-    let credentials: Record<string, unknown>;
+    let credentials: { client_email: string; private_key: string; private_key_id?: string };
     try {
-      credentials = JSON.parse(raw) as Record<string, unknown>;
+      credentials = JSON.parse(raw);
     } catch {
       throw new Error("[storage/gcs] GOOGLE_SERVICE_ACCOUNT_JSON is not valid JSON");
     }
-    const client = new Storage({ credentials });
+    // Use self-signed JWT auth (useJWTAccessWithScope=true) to avoid calling
+    // oauth2.googleapis.com/token — GCS fully supports direct JWT Bearer tokens.
+    const authClient = new JWT({
+      email: credentials.client_email,
+      key: credentials.private_key,
+      keyId: credentials.private_key_id,
+      scopes: ["https://www.googleapis.com/auth/devstorage.full_control"],
+    });
+    authClient.useJWTAccessWithScope = true;
+    const client = new Storage({ authClient } as never);
     this._bucket = client.bucket(this._bucketName);
   }
 
